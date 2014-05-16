@@ -45,8 +45,8 @@ enum TextAlign
     right,
 }
 
-///
-enum MouseButton
+/** The possible mouse buttons. These can be used as bitflags. */
+enum MouseButton : ubyte
 {
     left  = 0x01,
     right = 0x02,
