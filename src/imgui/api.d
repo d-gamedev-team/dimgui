@@ -17,6 +17,10 @@
  */
 module imgui.api;
 
+/**
+    This module contains the API of the imgui library.
+*/
+
 import std.math;
 import std.stdio;
 import std.string;
