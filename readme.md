@@ -1,6 +1,6 @@
 # dimgui
 
-![dimgui](https://raw.github.com/d-gamedev-team/dimgui/master/screenshot/dimgui.png)
+![dimgui](https://raw.github.com/d-gamedev-team/dimgui/master/screenshot/imgui.png)
 
 This is a D port of the [imgui] OpenGL GUI library.
 
@@ -34,6 +34,7 @@ Distributed under the [zlib] license.
 
 See the accompanying file [license.txt][zlib].
 
+[dub]: http://code.dlang.org/
 [imgui]: https://github.com/AdrienHerubel/imgui
 [zlib]: https://raw.github.com/d-gamedev-team/dimgui/master/license.txt
 [glfw]: http://www.glfw.org/
