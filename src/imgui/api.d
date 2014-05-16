@@ -80,6 +80,9 @@ void imguiRender(int width, int height)
 /**
     Begin the definition of a new frame element.
 
+    Once elements within the frame area are defined
+    you must call $(D imguiEndFrame) to end the definition.
+
     Params:
 
     cursorX = The cursor's last X position.
@@ -116,6 +119,9 @@ void imguiEndFrame()
 
 /**
     Begin the definition of a new scrollable area.
+
+    Once elements within the scrollable area are defined
+    you must call $(D imguiEndScrollArea) to end the definition.
 
     Params:
 
@@ -438,28 +444,59 @@ bool imguiCollapse(const(char)[] label, const(char)[] subtext, bool* checkState,
     return res;
 }
 
-///
-void imguiLabel(const(char)[] text)
+/**
+    Define a new label.
+
+    Params:
+
+    label = The text that will be displayed as the label.
+*/
+void imguiLabel(const(char)[] label)
 {
     int x = g_state.widgetX;
     int y = g_state.widgetY - BUTTON_HEIGHT;
     g_state.widgetY -= BUTTON_HEIGHT;
-    addGfxCmdText(x, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, text, RGBA(255, 255, 255, 255));
+    addGfxCmdText(x, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, RGBA(255, 255, 255, 255));
 }
 
-///
-void imguiValue(const(char)[] text)
+
+/**
+    Define a new value.
+
+    Params:
+
+    label = The text that will be displayed as the value.
+*/
+void imguiValue(const(char)[] label)
 {
     const int x = g_state.widgetX;
     const int y = g_state.widgetY - BUTTON_HEIGHT;
     const int w = g_state.widgetW;
     g_state.widgetY -= BUTTON_HEIGHT;
 
-    addGfxCmdText(x + w - BUTTON_HEIGHT / 2, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.right, text, RGBA(255, 255, 255, 200));
+    addGfxCmdText(x + w - BUTTON_HEIGHT / 2, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.right, label, RGBA(255, 255, 255, 200));
 }
 
-///
-bool imguiSlider(const(char)[] text, float* val, float vmin, float vmax, float vinc, Enabled enabled = Enabled.yes)
+/**
+    Define a new slider.
+
+    Params:
+
+    label = The text that will be displayed above the slider.
+    subtext = Additional text displayed on the right of the label.
+    sliderState = A pointer to a variable which holds the current slider value.
+    minValue = The minimum value that the slider can hold.
+    maxValue = The maximum value that the slider can hold.
+    stepValue = The step at which the value of the slider will increase or decrease.
+    enabled = Set whether the slider's value can can be changed with the mouse.
+
+    Returns:
+
+    Returns $(D true) if the slider is enabled and was pressed.
+    Note that pressing a slider implies pressing and releasing the
+    left mouse button while over the slider.
+*/
+bool imguiSlider(const(char)[] label, float* sliderState, float minValue, float maxValue, float stepValue, Enabled enabled = Enabled.yes)
 {
     g_state.widgetId++;
     uint id = (g_state.areaId << 16) | g_state.widgetId;
@@ -474,7 +511,7 @@ bool imguiSlider(const(char)[] text, float* val, float vmin, float vmax, float v
 
     const int range = w - SLIDER_MARKER_WIDTH;
 
-    float u = (*val - vmin) / (vmax - vmin);
+    float u = (*sliderState - minValue) / (maxValue - minValue);
 
     if (u < 0)
         u = 0;
@@ -504,8 +541,8 @@ bool imguiSlider(const(char)[] text, float* val, float vmin, float vmax, float v
 
             if (u > 1)
                 u = 1;
-            *val       = vmin + u * (vmax - vmin);
-            *val       = floor(*val / vinc + 0.5f) * vinc; // Snap to vinc
+            *sliderState = minValue + u * (maxValue - minValue);
+            *sliderState = floor(*sliderState / stepValue + 0.5f) * stepValue; // Snap to stepValue
             m          = cast(int)(u * range);
             valChanged = true;
         }
@@ -517,47 +554,47 @@ bool imguiSlider(const(char)[] text, float* val, float vmin, float vmax, float v
         addGfxCmdRoundedRect(cast(float)(x + m), cast(float)y, cast(float)SLIDER_MARKER_WIDTH, cast(float)SLIDER_HEIGHT, 4.0f, isHot(id) ? RGBA(255, 196, 0, 128) : RGBA(255, 255, 255, 64));
 
     // TODO: fix this, take a look at 'nicenum'.
-    int digits = cast(int)(ceil(log10(vinc)));
+    int digits = cast(int)(ceil(log10(stepValue)));
     char[16] fmt;
     sformat(fmt, "%%.%df", digits >= 0 ? 0 : -digits);
-    char[128] msgBuf;
-    auto msg = sformat(msgBuf, fmt, *val);
+    char[32] msgBuf;
+    string msg = sformat(msgBuf, fmt, *sliderState).idup;
 
     if (enabled)
     {
-        addGfxCmdText(x + SLIDER_HEIGHT / 2, y + SLIDER_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, text, isHot(id) ? RGBA(255, 196, 0, 255) : RGBA(255, 255, 255, 200));
+        addGfxCmdText(x + SLIDER_HEIGHT / 2, y + SLIDER_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, isHot(id) ? RGBA(255, 196, 0, 255) : RGBA(255, 255, 255, 200));
         addGfxCmdText(x + w - SLIDER_HEIGHT / 2, y + SLIDER_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.right, msg, isHot(id) ? RGBA(255, 196, 0, 255) : RGBA(255, 255, 255, 200));
     }
     else
     {
-        addGfxCmdText(x + SLIDER_HEIGHT / 2, y + SLIDER_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, text, RGBA(128, 128, 128, 200));
+        addGfxCmdText(x + SLIDER_HEIGHT / 2, y + SLIDER_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, RGBA(128, 128, 128, 200));
         addGfxCmdText(x + w - SLIDER_HEIGHT / 2, y + SLIDER_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.right, msg, RGBA(128, 128, 128, 200));
     }
 
     return res || valChanged;
 }
 
-///
+/** Add horizontal indentation for elements to be added. */
 void imguiIndent()
 {
     g_state.widgetX += INDENT_SIZE;
     g_state.widgetW -= INDENT_SIZE;
 }
 
-///
+/** Remove horizontal indentation for elements to be added. */
 void imguiUnindent()
 {
     g_state.widgetX -= INDENT_SIZE;
     g_state.widgetW += INDENT_SIZE;
 }
 
-///
+/** Add vertical space as a separator below the last element. */
 void imguiSeparator()
 {
     g_state.widgetY -= DEFAULT_SPACING * 3;
 }
 
-///
+/** Add a horizontal line as a separator below the last element. */
 void imguiSeparatorLine()
 {
     int x = g_state.widgetX;
@@ -569,26 +606,26 @@ void imguiSeparatorLine()
     addGfxCmdRect(cast(float)x, cast(float)y, cast(float)w, cast(float)h, RGBA(255, 255, 255, 32));
 }
 
-///
-void imguiDrawText(int x, int y, int align_, const(char)[] text, RGBA color)
+/** Draw text. */
+void imguiDrawText(int xPos, int yPos, TextAlign textAlign, const(char)[] text, RGBA color)
 {
-    addGfxCmdText(x, y, align_, text, color);
+    addGfxCmdText(xPos, yPos, textAlign, text, color);
 }
 
-///
+/** Draw a line. */
 void imguiDrawLine(float x0, float y0, float x1, float y1, float r, RGBA color)
 {
     addGfxCmdLine(x0, y0, x1, y1, r, color);
 }
 
-///
-void imguiDrawRect(float x, float y, float w, float h, RGBA color)
+/** Draw a rectangle. */
+void imguiDrawRect(float xPos, float yPos, float width, float height, RGBA color)
 {
-    addGfxCmdRect(x, y, w, h, color);
+    addGfxCmdRect(xPos, yPos, width, height, color);
 }
 
-///
-void imguiDrawRoundedRect(float x, float y, float w, float h, float r, RGBA color)
+/** Draw a rounded rectangle. */
+void imguiDrawRoundedRect(float xPos, float yPos, float width, float height, float r, RGBA color)
 {
-    addGfxCmdRoundedRect(x, y, w, h, r, color);
+    addGfxCmdRoundedRect(xPos, yPos, width, height, r, color);
 }

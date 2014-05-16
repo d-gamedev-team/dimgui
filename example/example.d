@@ -31,13 +31,13 @@ bool  checkState1  = false;
 bool  checkState2  = false;
 bool  collapseState  = true;
 bool  checked4  = false;
-float value1    = 50.0;
-float value2    = 30.0;
+float sliderValue1    = 50.0;
+float sliderValue2    = 30.0;
 int scrollarea1 = 0;
 int scrollarea2 = 0;
 int scrollarea3 = 0;
 int mscroll = 0;
-char[] lastClickInfo;  // last clicked element information
+char[] lastInfo;  // last clicked element information
 char[1024] buffer;  // buffer to hold our text
 int windowWidth, windowHeight;
 
@@ -160,13 +160,13 @@ void renderGui(Window window)
     imguiItem("Disabled item", Enabled.no);
 
     if (imguiCheck("Checkbox", &checkState1))
-        lastClickInfo = sformat(buffer, "Toggled the checkbox to: '%s'", checkState1 ? "On" : "Off");
+        lastInfo = sformat(buffer, "Toggled the checkbox to: '%s'", checkState1 ? "On" : "Off");
 
     // should not be clickable
     enforce(!imguiCheck("Disabled checkbox", &checkState2, Enabled.no));
 
     if (imguiCollapse("Collapse", "subtext", &collapseState))
-        lastClickInfo = sformat(buffer, "subtext changed to: '%s'", collapseState ? "Maximized" : "Minimized");
+        lastInfo = sformat(buffer, "subtext changed to: '%s'", collapseState ? "Maximized" : "Minimized");
 
     if (collapseState)
     {
@@ -180,8 +180,13 @@ void renderGui(Window window)
 
     imguiLabel("Label");
     imguiValue("Value");
-    imguiSlider("Slider", &value1, 0.0, 100.0, 1.0f);
-    imguiSlider("Disabled slider", &value2, 0.0, 100.0, 1.0f, Enabled.no);
+
+    if (imguiSlider("Slider", &sliderValue1, 0.0, 100.0, 1.0f))
+        lastInfo = sformat(buffer, "Slider clicked, current value is: '%s'", sliderValue1);
+
+    // should not be clickable
+    enforce(!imguiSlider("Disabled slider", &sliderValue2, 0.0, 100.0, 1.0f, Enabled.no));
+
     imguiIndent();
     imguiLabel("Indented");
     imguiUnindent();
@@ -199,7 +204,7 @@ void renderGui(Window window)
     imguiEndScrollArea();
 
     imguiBeginScrollArea("Scroll area 3", 30 + (2 * scrollAreaWidth), 10, scrollAreaWidth, scrollAreaHeight, &scrollarea3);
-    imguiLabel(lastClickInfo);
+    imguiLabel(lastInfo);
     imguiEndScrollArea();
 
     imguiEndFrame();
