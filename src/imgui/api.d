@@ -52,6 +52,13 @@ enum MouseButton
     right = 0x02,
 }
 
+///
+enum Enabled : bool
+{
+    no = false,
+    yes = true,
+}
+
 /** Initialize the imgui library. */
 bool imguiInit(string fontPath)
 {
@@ -220,7 +227,7 @@ void imguiEndScrollArea()
 }
 
 ///
-bool imguiButton(string text, bool enabled = true)
+bool imguiButton(string text, Enabled enabled = Enabled.yes)
 {
     g_state.widgetId++;
     uint id = (g_state.areaId << 16) | g_state.widgetId;
@@ -245,7 +252,7 @@ bool imguiButton(string text, bool enabled = true)
 }
 
 ///
-bool imguiItem(string text, bool enabled = true)
+bool imguiItem(string text, Enabled enabled = Enabled.yes)
 {
     g_state.widgetId++;
     uint id = (g_state.areaId << 16) | g_state.widgetId;
@@ -271,7 +278,7 @@ bool imguiItem(string text, bool enabled = true)
 }
 
 ///
-bool imguiCheck(string text, bool checked, bool enabled = true)
+bool imguiCheck(string text, bool checked, Enabled enabled = Enabled.yes)
 {
     g_state.widgetId++;
     uint id = (g_state.areaId << 16) | g_state.widgetId;
@@ -306,7 +313,7 @@ bool imguiCheck(string text, bool checked, bool enabled = true)
 }
 
 ///
-bool imguiCollapse(string text, string subtext, bool checked, bool enabled = true)
+bool imguiCollapse(string text, string subtext, bool checked, Enabled enabled = Enabled.yes)
 {
     g_state.widgetId++;
     uint id = (g_state.areaId << 16) | g_state.widgetId;
@@ -360,7 +367,7 @@ void imguiValue(string text)
 }
 
 ///
-bool imguiSlider(string text, float* val, float vmin, float vmax, float vinc, bool enabled = true)
+bool imguiSlider(string text, float* val, float vmin, float vmax, float vinc, Enabled enabled = Enabled.yes)
 {
     g_state.widgetId++;
     uint id = (g_state.areaId << 16) | g_state.widgetId;

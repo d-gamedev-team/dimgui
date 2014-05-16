@@ -150,15 +150,15 @@ void renderGui(Window window)
     imguiSeparator();
 
     imguiButton("Button");
-    imguiButton("Disabled button", false);
+    imguiButton("Disabled button", Enabled.no);
     imguiItem("Item");
-    imguiItem("Disabled item", false);
+    imguiItem("Disabled item", Enabled.no);
     toggle = imguiCheck("Checkbox", checked1);
 
     if (toggle)
         checked1 = !checked1;
 
-    toggle = imguiCheck("Disabled checkbox", checked2, false);
+    toggle = imguiCheck("Disabled checkbox", checked2, Enabled.no);
 
     if (toggle)
         checked2 = !checked2;
@@ -175,7 +175,7 @@ void renderGui(Window window)
     if (toggle)
         checked3 = !checked3;
 
-    toggle = imguiCollapse("Disabled collapse", "subtext", checked4, false);
+    toggle = imguiCollapse("Disabled collapse", "subtext", checked4, Enabled.no);
 
     if (toggle)
         checked4 = !checked4;
@@ -183,7 +183,7 @@ void renderGui(Window window)
     imguiLabel("Label");
     imguiValue("Value");
     imguiSlider("Slider", &value1, 0.0, 100.0, 1.0f);
-    imguiSlider("Disabled slider", &value2, 0.0, 100.0, 1.0f, false);
+    imguiSlider("Disabled slider", &value2, 0.0, 100.0, 1.0f, Enabled.no);
     imguiIndent();
     imguiLabel("Indented");
     imguiUnindent();
