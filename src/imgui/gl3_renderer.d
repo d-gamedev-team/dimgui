@@ -26,8 +26,11 @@ import std.stdio;
 import glad.gl.all;
 import glad.gl.loader;
 
+import imgui.api;
 import imgui.gui;
 import imgui.stdb_truetype;
+
+package:
 
 /** Globals start. */
 

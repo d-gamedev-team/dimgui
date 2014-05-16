@@ -15,6 +15,8 @@ import std.math;
 import imgui.gui;
 import imgui.gl3_renderer;
 
+package:
+
 alias ubyte stbtt_uint8;
 alias byte stbtt_int8;
 alias ushort stbtt_uint16;

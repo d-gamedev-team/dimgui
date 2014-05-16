@@ -91,7 +91,7 @@ int main(string[] args)
 
     string fontPath = thisExePath().dirName().buildPath("../").buildPath("DroidSans.ttf");
 
-    enforce(imguiRenderGLInit(fontPath));
+    enforce(imguiInit(fontPath));
 
     glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
     glEnable(GL_BLEND);
@@ -113,7 +113,7 @@ int main(string[] args)
     }
 
     // Clean UI
-    imguiRenderGLDestroy();
+    imguiDestroy();
 
     return 0;
 }
@@ -212,5 +212,5 @@ void renderGui(Window window)
     imguiDrawRect(30 + windowWidth / 5 * 2, windowHeight - 710, 100, 100, imguiRGBA(32, 32, 192, 192));
     imguiDrawRect(30 + windowWidth / 5 * 2, windowHeight - 830, 100, 100, imguiRGBA(192, 32, 32, 192));
 
-    imguiRenderGLDraw(windowWidth, windowHeight);
+    imguiRender(windowWidth, windowHeight);
 }

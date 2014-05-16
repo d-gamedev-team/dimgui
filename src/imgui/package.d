@@ -19,6 +19,5 @@ module imgui;
 
 public
 {
-	import imgui.gui;
-	import imgui.gl3_renderer;
+	import imgui.api;
 }
