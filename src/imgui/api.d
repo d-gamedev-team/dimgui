@@ -60,7 +60,7 @@ enum Enabled : bool
 }
 
 /** Initialize the imgui library. */
-bool imguiInit(string fontPath)
+bool imguiInit(const(char)[] fontPath)
 {
     return imguiRenderGLInit(fontPath);
 }
@@ -71,16 +71,25 @@ void imguiDestroy()
     imguiRenderGLDestroy();
 }
 
-/** Render the batched commands. */
+/** Render all of the batched commands. */
 void imguiRender(int width, int height)
 {
     imguiRenderGLDraw(width, height);
 }
 
-///
-void imguiBeginFrame(int mx, int my, ubyte mbut, int scroll)
+/**
+    Begin the definition of a new frame element.
+
+    Params:
+
+    cursorX = The cursor's last X position.
+    cursorY = The cursor's last Y position.
+    mouseButtons = The last mouse buttons pressed (a value or a combination of values of a $(D MouseButton)).
+    mouseScroll = The last scroll value emitted by the mouse.
+*/
+void imguiBeginFrame(int cursorX, int cursorY, ubyte mouseButtons, int mouseScroll)
 {
-    updateInput(mx, my, mbut, scroll);
+    updateInput(cursorX, cursorY, mouseButtons, mouseScroll);
 
     g_state.hot     = g_state.hotToBe;
     g_state.hotToBe = 0;
@@ -99,45 +108,60 @@ void imguiBeginFrame(int mx, int my, ubyte mbut, int scroll)
     resetGfxCmdQueue();
 }
 
-///
+/** End the definition of the last frame element. */
 void imguiEndFrame()
 {
     clearInput();
 }
 
-///
-bool imguiBeginScrollArea(string name, int x, int y, int w, int h, int* scroll)
+/**
+    Begin the definition of a new scrollable area.
+
+    Params:
+
+    title = The title that will be displayed for this scroll area.
+    xPos = The X position of the scroll area.
+    yPos = The Y position of the scroll area.
+    width = The width of the scroll area.
+    height = The height of the scroll area.
+    scroll = A pointer to a variable which will hold the current scroll value of the widget.
+
+    Returns:
+
+    Returns $(D true) if the mouse was located inside the scrollable area.
+*/
+bool imguiBeginScrollArea(const(char)[] title, int xPos, int yPos, int width, int height, int* scroll)
 {
     g_state.areaId++;
     g_state.widgetId = 0;
     g_scrollId       = (g_state.areaId << 16) | g_state.widgetId;
 
-    g_state.widgetX = x + SCROLL_AREA_PADDING;
-    g_state.widgetY = y + h - AREA_HEADER + (*scroll);
-    g_state.widgetW = w - SCROLL_AREA_PADDING * 4;
-    g_scrollTop     = y - AREA_HEADER + h;
-    g_scrollBottom  = y + SCROLL_AREA_PADDING;
-    g_scrollRight   = x + w - SCROLL_AREA_PADDING * 3;
+    g_state.widgetX = xPos + SCROLL_AREA_PADDING;
+    g_state.widgetY = yPos + height - AREA_HEADER + (*scroll);
+    g_state.widgetW = width - SCROLL_AREA_PADDING * 4;
+    g_scrollTop     = yPos - AREA_HEADER + height;
+    g_scrollBottom  = yPos + SCROLL_AREA_PADDING;
+    g_scrollRight   = xPos + width - SCROLL_AREA_PADDING * 3;
     g_scrollVal     = scroll;
 
     g_scrollAreaTop = g_state.widgetY;
 
-    g_focusTop    = y - AREA_HEADER;
-    g_focusBottom = y - AREA_HEADER + h;
+    g_focusTop    = yPos - AREA_HEADER;
+    g_focusBottom = yPos - AREA_HEADER + height;
 
-    g_insideScrollArea = inRect(x, y, w, h, false);
+    g_insideScrollArea = inRect(xPos, yPos, width, height, false);
     g_state.insideCurrentScroll = g_insideScrollArea;
 
-    addGfxCmdRoundedRect(cast(float)x, cast(float)y, cast(float)w, cast(float)h, 6, RGBA(0, 0, 0, 192));
+    addGfxCmdRoundedRect(cast(float)xPos, cast(float)yPos, cast(float)width, cast(float)height, 6, RGBA(0, 0, 0, 192));
 
-    addGfxCmdText(x + AREA_HEADER / 2, y + h - AREA_HEADER / 2 - TEXT_HEIGHT / 2, TextAlign.left, name, RGBA(255, 255, 255, 128));
+    addGfxCmdText(xPos + AREA_HEADER / 2, yPos + height - AREA_HEADER / 2 - TEXT_HEIGHT / 2, TextAlign.left, title, RGBA(255, 255, 255, 128));
 
-    addGfxCmdScissor(x + SCROLL_AREA_PADDING, y + SCROLL_AREA_PADDING, w - SCROLL_AREA_PADDING * 4, h - AREA_HEADER - SCROLL_AREA_PADDING);
+    addGfxCmdScissor(xPos + SCROLL_AREA_PADDING, yPos + SCROLL_AREA_PADDING, width - SCROLL_AREA_PADDING * 4, height - AREA_HEADER - SCROLL_AREA_PADDING);
 
     return g_insideScrollArea;
 }
 
-///
+/** End the definition of the last scrollable element. */
 void imguiEndScrollArea()
 {
     // Disable scissoring.
@@ -226,8 +250,21 @@ void imguiEndScrollArea()
     g_state.insideCurrentScroll = false;
 }
 
-///
-bool imguiButton(string text, Enabled enabled = Enabled.yes)
+/**
+    Define a new button.
+
+    Params:
+
+    label = The text that will be displayed on the button.
+    enabled = Set whether the button can be pressed.
+
+    Returns:
+
+    Returns $(D true) if the button is enabled and was pressed.
+    Note that pressing a button implies pressing and releasing the
+    left mouse button while over the gui button.
+*/
+bool imguiButton(const(char)[] label, Enabled enabled = Enabled.yes)
 {
     g_state.widgetId++;
     uint id = (g_state.areaId << 16) | g_state.widgetId;
@@ -244,15 +281,87 @@ bool imguiButton(string text, Enabled enabled = Enabled.yes)
     addGfxCmdRoundedRect(cast(float)x, cast(float)y, cast(float)w, cast(float)h, cast(float)BUTTON_HEIGHT / 2 - 1, RGBA(128, 128, 128, isActive(id) ? 196 : 96));
 
     if (enabled)
-        addGfxCmdText(x + BUTTON_HEIGHT / 2, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, text, isHot(id) ? RGBA(255, 196, 0, 255) : RGBA(255, 255, 255, 200));
+        addGfxCmdText(x + BUTTON_HEIGHT / 2, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, isHot(id) ? RGBA(255, 196, 0, 255) : RGBA(255, 255, 255, 200));
     else
-        addGfxCmdText(x + BUTTON_HEIGHT / 2, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, text, RGBA(128, 128, 128, 200));
+        addGfxCmdText(x + BUTTON_HEIGHT / 2, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, RGBA(128, 128, 128, 200));
 
     return res;
 }
 
-///
-bool imguiItem(string text, Enabled enabled = Enabled.yes)
+/**
+    Define a new checkbox.
+
+    Params:
+
+    label = The text that will be displayed on the button.
+    checkState = A pointer to a variable which holds the current state of the checkbox.
+    enabled = Set whether the checkbox can be pressed.
+
+    Returns:
+
+    Returns $(D true) if the checkbox was toggled on or off.
+    Note that toggling implies pressing and releasing the
+    left mouse button while over the checkbox.
+
+    Example:
+    -----
+    bool checkState = false;  // initially un-checked
+    if (imguiCheck("checkbox", &checkState))  // checkbox was toggled
+        writeln(checkState);  // check the current state
+    -----
+*/
+bool imguiCheck(const(char)[] text, bool* checkState, Enabled enabled = Enabled.yes)
+{
+    g_state.widgetId++;
+    uint id = (g_state.areaId << 16) | g_state.widgetId;
+
+    int x = g_state.widgetX;
+    int y = g_state.widgetY - BUTTON_HEIGHT;
+    int w = g_state.widgetW;
+    int h = BUTTON_HEIGHT;
+    g_state.widgetY -= BUTTON_HEIGHT + DEFAULT_SPACING;
+
+    bool over = enabled && inRect(x, y, w, h);
+    bool res  = buttonLogic(id, over);
+
+    if (res)  // toggle the state
+        *checkState ^= 1;
+
+    const int cx = x + BUTTON_HEIGHT / 2 - CHECK_SIZE / 2;
+    const int cy = y + BUTTON_HEIGHT / 2 - CHECK_SIZE / 2;
+    addGfxCmdRoundedRect(cast(float)cx - 3, cast(float)cy - 3, cast(float)CHECK_SIZE + 6, cast(float)CHECK_SIZE + 6, 4, RGBA(128, 128, 128, isActive(id) ? 196 : 96));
+
+    if (*checkState)
+    {
+        if (enabled)
+            addGfxCmdRoundedRect(cast(float)cx, cast(float)cy, cast(float)CHECK_SIZE, cast(float)CHECK_SIZE, cast(float)CHECK_SIZE / 2 - 1, RGBA(255, 255, 255, isActive(id) ? 255 : 200));
+        else
+            addGfxCmdRoundedRect(cast(float)cx, cast(float)cy, cast(float)CHECK_SIZE, cast(float)CHECK_SIZE, cast(float)CHECK_SIZE / 2 - 1, RGBA(128, 128, 128, 200));
+    }
+
+    if (enabled)
+        addGfxCmdText(x + BUTTON_HEIGHT, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, text, isHot(id) ? RGBA(255, 196, 0, 255) : RGBA(255, 255, 255, 200));
+    else
+        addGfxCmdText(x + BUTTON_HEIGHT, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, text, RGBA(128, 128, 128, 200));
+
+    return res;
+}
+
+/**
+    Define a new item.
+
+    Params:
+
+    label = The text that will be displayed as the item.
+    enabled = Set whether the item can be pressed.
+
+    Returns:
+
+    Returns $(D true) if the item is enabled and was pressed.
+    Note that pressing an item implies pressing and releasing the
+    left mouse button while over the item.
+*/
+bool imguiItem(const(char)[] label, Enabled enabled = Enabled.yes)
 {
     g_state.widgetId++;
     uint id = (g_state.areaId << 16) | g_state.widgetId;
@@ -270,50 +379,30 @@ bool imguiItem(string text, Enabled enabled = Enabled.yes)
         addGfxCmdRoundedRect(cast(float)x, cast(float)y, cast(float)w, cast(float)h, 2.0f, RGBA(255, 196, 0, isActive(id) ? 196 : 96));
 
     if (enabled)
-        addGfxCmdText(x + BUTTON_HEIGHT / 2, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, text, RGBA(255, 255, 255, 200));
+        addGfxCmdText(x + BUTTON_HEIGHT / 2, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, RGBA(255, 255, 255, 200));
     else
-        addGfxCmdText(x + BUTTON_HEIGHT / 2, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, text, RGBA(128, 128, 128, 200));
+        addGfxCmdText(x + BUTTON_HEIGHT / 2, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, RGBA(128, 128, 128, 200));
 
     return res;
 }
 
-///
-bool imguiCheck(string text, bool checked, Enabled enabled = Enabled.yes)
-{
-    g_state.widgetId++;
-    uint id = (g_state.areaId << 16) | g_state.widgetId;
+/**
+    Define a new collapsable element.
 
-    int x = g_state.widgetX;
-    int y = g_state.widgetY - BUTTON_HEIGHT;
-    int w = g_state.widgetW;
-    int h = BUTTON_HEIGHT;
-    g_state.widgetY -= BUTTON_HEIGHT + DEFAULT_SPACING;
+    Params:
 
-    bool over = enabled && inRect(x, y, w, h);
-    bool res  = buttonLogic(id, over);
+    label = The text that will be displayed as the item.
+    subtext = Additional text displayed on the right of the label.
+    checkState = A pointer to a variable which holds the current state of the collapsable element.
+    enabled = Set whether the element can be pressed.
 
-    const int cx = x + BUTTON_HEIGHT / 2 - CHECK_SIZE / 2;
-    const int cy = y + BUTTON_HEIGHT / 2 - CHECK_SIZE / 2;
-    addGfxCmdRoundedRect(cast(float)cx - 3, cast(float)cy - 3, cast(float)CHECK_SIZE + 6, cast(float)CHECK_SIZE + 6, 4, RGBA(128, 128, 128, isActive(id) ? 196 : 96));
+    Returns:
 
-    if (checked)
-    {
-        if (enabled)
-            addGfxCmdRoundedRect(cast(float)cx, cast(float)cy, cast(float)CHECK_SIZE, cast(float)CHECK_SIZE, cast(float)CHECK_SIZE / 2 - 1, RGBA(255, 255, 255, isActive(id) ? 255 : 200));
-        else
-            addGfxCmdRoundedRect(cast(float)cx, cast(float)cy, cast(float)CHECK_SIZE, cast(float)CHECK_SIZE, cast(float)CHECK_SIZE / 2 - 1, RGBA(128, 128, 128, 200));
-    }
-
-    if (enabled)
-        addGfxCmdText(x + BUTTON_HEIGHT, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, text, isHot(id) ? RGBA(255, 196, 0, 255) : RGBA(255, 255, 255, 200));
-    else
-        addGfxCmdText(x + BUTTON_HEIGHT, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, text, RGBA(128, 128, 128, 200));
-
-    return res;
-}
-
-///
-bool imguiCollapse(string text, string subtext, bool checked, Enabled enabled = Enabled.yes)
+    Returns $(D true) if the collapsable element is enabled and was pressed.
+    Note that pressing a collapsable element implies pressing and releasing the
+    left mouse button while over the collapsable element.
+*/
+bool imguiCollapse(const(char)[] label, const(char)[] subtext, bool* checkState, Enabled enabled = Enabled.yes)
 {
     g_state.widgetId++;
     uint id = (g_state.areaId << 16) | g_state.widgetId;
@@ -330,15 +419,18 @@ bool imguiCollapse(string text, string subtext, bool checked, Enabled enabled = 
     bool over = enabled && inRect(x, y, w, h);
     bool res  = buttonLogic(id, over);
 
-    if (checked)
+    if (res)  // toggle the state
+        *checkState ^= 1;
+
+    if (*checkState)
         addGfxCmdTriangle(cx, cy, CHECK_SIZE, CHECK_SIZE, 2, RGBA(255, 255, 255, isActive(id) ? 255 : 200));
     else
         addGfxCmdTriangle(cx, cy, CHECK_SIZE, CHECK_SIZE, 1, RGBA(255, 255, 255, isActive(id) ? 255 : 200));
 
     if (enabled)
-        addGfxCmdText(x + BUTTON_HEIGHT, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, text, isHot(id) ? RGBA(255, 196, 0, 255) : RGBA(255, 255, 255, 200));
+        addGfxCmdText(x + BUTTON_HEIGHT, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, isHot(id) ? RGBA(255, 196, 0, 255) : RGBA(255, 255, 255, 200));
     else
-        addGfxCmdText(x + BUTTON_HEIGHT, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, text, RGBA(128, 128, 128, 200));
+        addGfxCmdText(x + BUTTON_HEIGHT, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, RGBA(128, 128, 128, 200));
 
     if (subtext)
         addGfxCmdText(x + w - BUTTON_HEIGHT / 2, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.right, subtext, RGBA(255, 255, 255, 128));
@@ -347,7 +439,7 @@ bool imguiCollapse(string text, string subtext, bool checked, Enabled enabled = 
 }
 
 ///
-void imguiLabel(string text)
+void imguiLabel(const(char)[] text)
 {
     int x = g_state.widgetX;
     int y = g_state.widgetY - BUTTON_HEIGHT;
@@ -356,7 +448,7 @@ void imguiLabel(string text)
 }
 
 ///
-void imguiValue(string text)
+void imguiValue(const(char)[] text)
 {
     const int x = g_state.widgetX;
     const int y = g_state.widgetY - BUTTON_HEIGHT;
@@ -367,7 +459,7 @@ void imguiValue(string text)
 }
 
 ///
-bool imguiSlider(string text, float* val, float vmin, float vmax, float vinc, Enabled enabled = Enabled.yes)
+bool imguiSlider(const(char)[] text, float* val, float vmin, float vmax, float vinc, Enabled enabled = Enabled.yes)
 {
     g_state.widgetId++;
     uint id = (g_state.areaId << 16) | g_state.widgetId;
@@ -429,9 +521,7 @@ bool imguiSlider(string text, float* val, float vmin, float vmax, float vinc, En
     char[16] fmt;
     sformat(fmt, "%%.%df", digits >= 0 ? 0 : -digits);
     char[128] msgBuf;
-    sformat(msgBuf, fmt, *val);
-
-    string msg = msgBuf.idup;
+    auto msg = sformat(msgBuf, fmt, *val);
 
     if (enabled)
     {
@@ -480,7 +570,7 @@ void imguiSeparatorLine()
 }
 
 ///
-void imguiDrawText(int x, int y, int align_, string text, RGBA color)
+void imguiDrawText(int x, int y, int align_, const(char)[] text, RGBA color)
 {
     addGfxCmdText(x, y, align_, text, color);
 }

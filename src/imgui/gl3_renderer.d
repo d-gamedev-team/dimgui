@@ -331,7 +331,7 @@ void drawLine(float x0, float y0, float x1, float y1, float r, float fth, uint c
     drawPolygon(verts.ptr, 4, fth, col);
 }
 
-bool imguiRenderGLInit(string fontpath)
+bool imguiRenderGLInit(const(char)[] fontpath)
 {
     for (int i = 0; i < CIRCLE_VERTS; ++i)
     {
@@ -341,7 +341,7 @@ bool imguiRenderGLInit(string fontpath)
     }
 
     // Load font.
-    auto file = File(fontpath, "rb");
+    auto file = File(cast(string)fontpath, "rb");
     FILE* fp = file.getFP();
 
     if (!fp)
@@ -505,7 +505,7 @@ void getBakedQuad(stbtt_bakedchar* chardata, int pw, int ph, int char_index,
     *xpos += b.xadvance;
 }
 
-float getTextLength(stbtt_bakedchar* chardata, string text)
+float getTextLength(stbtt_bakedchar* chardata, const(char)[] text)
 {
     float xpos = 0;
     float len  = 0;
@@ -537,7 +537,7 @@ float getTextLength(stbtt_bakedchar* chardata, string text)
     return len;
 }
 
-void drawText(float x, float y, string text, int align_, uint col)
+void drawText(float x, float y, const(char)[] text, int align_, uint col)
 {
     if (!g_ftex)
         return;

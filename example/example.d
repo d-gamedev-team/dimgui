@@ -1,15 +1,15 @@
 module example;
 
-import std.exception;
-import std.stdio;
+//~ import std.exception;
+//~ import std.stdio;
 
-import std.algorithm : min;
-import std.exception : enforce;
+//~ import std.algorithm;
+import std.exception;
 import std.file;
-import std.functional : toDelegate;
+//~ import std.functional;
 import std.path;
-import std.stdio : stderr;
-import std.string : format;
+import std.stdio;
+import std.string;
 
 import deimos.glfw.glfw3;
 
@@ -27,17 +27,18 @@ import imgui;
 import window;
 
 // imgui states
-bool  checked1  = false;
-bool  checked2  = false;
-bool  checked3  = true;
+bool  checkState1  = false;
+bool  checkState2  = false;
+bool  collapseState  = true;
 bool  checked4  = false;
 float value1    = 50.0;
 float value2    = 30.0;
 int scrollarea1 = 0;
 int scrollarea2 = 0;
-
+int scrollarea3 = 0;
 int mscroll = 0;
-
+char[] lastClickInfo;  // last clicked element information
+char[1024] buffer;  // buffer to hold our text
 int windowWidth, windowHeight;
 
 /**
@@ -128,6 +129,9 @@ void renderGui(Window window)
     double mouseY;
     glfwGetCursorPos(window.window, &mouseX, &mouseY);
 
+    const scrollAreaWidth = windowWidth / 4;
+    const scrollAreaHeight = windowHeight - 20;
+
     int mousex = cast(int)mouseX;
     int mousey = cast(int)mouseY;
 
@@ -135,7 +139,6 @@ void renderGui(Window window)
     int leftButton   = glfwGetMouseButton(window.window, GLFW_MOUSE_BUTTON_LEFT);
     int rightButton  = glfwGetMouseButton(window.window, GLFW_MOUSE_BUTTON_RIGHT);
     int middleButton = glfwGetMouseButton(window.window, GLFW_MOUSE_BUTTON_MIDDLE);
-    int toggle       = 0;
 
     if (leftButton == GLFW_PRESS)
         mousebutton |= MouseButton.left;
@@ -145,40 +148,35 @@ void renderGui(Window window)
     if (mscroll != 0)
         mscroll = 0;
 
-    imguiBeginScrollArea("Scroll area", 10, 10, windowWidth / 5, windowHeight - 20, &scrollarea1);
+    imguiBeginScrollArea("Scroll area 1", 10, 10, scrollAreaWidth, scrollAreaHeight, &scrollarea1);
+
     imguiSeparatorLine();
     imguiSeparator();
 
     imguiButton("Button");
+
     imguiButton("Disabled button", Enabled.no);
     imguiItem("Item");
     imguiItem("Disabled item", Enabled.no);
-    toggle = imguiCheck("Checkbox", checked1);
 
-    if (toggle)
-        checked1 = !checked1;
+    if (imguiCheck("Checkbox", &checkState1))
+        lastClickInfo = sformat(buffer, "Toggled the checkbox to: '%s'", checkState1 ? "On" : "Off");
 
-    toggle = imguiCheck("Disabled checkbox", checked2, Enabled.no);
+    // should not be clickable
+    enforce(!imguiCheck("Disabled checkbox", &checkState2, Enabled.no));
 
-    if (toggle)
-        checked2 = !checked2;
+    if (imguiCollapse("Collapse", "subtext", &collapseState))
+        lastClickInfo = sformat(buffer, "subtext changed to: '%s'", collapseState ? "Maximized" : "Minimized");
 
-    toggle = imguiCollapse("Collapse", "subtext", checked3);
-
-    if (checked3)
+    if (collapseState)
     {
         imguiIndent();
         imguiLabel("Collapsable element");
         imguiUnindent();
     }
 
-    if (toggle)
-        checked3 = !checked3;
-
-    toggle = imguiCollapse("Disabled collapse", "subtext", checked4, Enabled.no);
-
-    if (toggle)
-        checked4 = !checked4;
+    // should not be clickable
+    enforce(!imguiCollapse("Disabled collapse", "subtext", &checked4, Enabled.no));
 
     imguiLabel("Label");
     imguiValue("Value");
@@ -191,7 +189,7 @@ void renderGui(Window window)
 
     imguiEndScrollArea();
 
-    imguiBeginScrollArea("Scroll area", 20 + windowWidth / 5, 500, windowWidth / 5, windowHeight - 510, &scrollarea2);
+    imguiBeginScrollArea("Scroll area 2", 20 + (1 * scrollAreaWidth), 10, scrollAreaWidth, scrollAreaHeight, &scrollarea2);
     imguiSeparatorLine();
     imguiSeparator();
 
@@ -199,23 +197,30 @@ void renderGui(Window window)
         imguiLabel("A wall of text");
 
     imguiEndScrollArea();
+
+    imguiBeginScrollArea("Scroll area 3", 30 + (2 * scrollAreaWidth), 10, scrollAreaWidth, scrollAreaHeight, &scrollarea3);
+    imguiLabel(lastClickInfo);
+    imguiEndScrollArea();
+
     imguiEndFrame();
 
-    imguiDrawText(30 + windowWidth / 5 * 2, windowHeight - 20, TextAlign.left, "Free text", RGBA(32, 192, 32, 192));
-    imguiDrawText(30 + windowWidth / 5 * 2 + 100, windowHeight - 40, TextAlign.right, "Free text", RGBA(32, 32, 192, 192));
-    imguiDrawText(30 + windowWidth / 5 * 2 + 50, windowHeight - 60, TextAlign.center, "Free text", RGBA(192, 32, 32, 192));
+    const graphicsXPos = 40 + (3 * scrollAreaWidth);
 
-    imguiDrawLine(30 + windowWidth / 5 * 2, windowHeight - 80, 30 + windowWidth / 5 * 2 + 100, windowHeight - 60, 1.0f, RGBA(32, 192, 32, 192));
-    imguiDrawLine(30 + windowWidth / 5 * 2, windowHeight - 100, 30 + windowWidth / 5 * 2 + 100, windowHeight - 80, 2.0, RGBA(32, 32, 192, 192));
-    imguiDrawLine(30 + windowWidth / 5 * 2, windowHeight - 120, 30 + windowWidth / 5 * 2 + 100, windowHeight - 100, 3.0, RGBA(192, 32, 32, 192));
+    imguiDrawText(graphicsXPos, scrollAreaHeight, TextAlign.left, "Free text", RGBA(32, 192, 32, 192));
+    imguiDrawText(graphicsXPos + 100, windowHeight - 40, TextAlign.right, "Free text", RGBA(32, 32, 192, 192));
+    imguiDrawText(graphicsXPos + 50, windowHeight - 60, TextAlign.center, "Free text", RGBA(192, 32, 32, 192));
 
-    imguiDrawRoundedRect(30 + windowWidth / 5 * 2, windowHeight - 240, 100, 100, 5.0, RGBA(32, 192, 32, 192));
-    imguiDrawRoundedRect(30 + windowWidth / 5 * 2, windowHeight - 350, 100, 100, 10.0, RGBA(32, 32, 192, 192));
-    imguiDrawRoundedRect(30 + windowWidth / 5 * 2, windowHeight - 470, 100, 100, 20.0, RGBA(192, 32, 32, 192));
+    imguiDrawLine(graphicsXPos, windowHeight - 80, graphicsXPos + 100, windowHeight - 60, 1.0f, RGBA(32, 192, 32, 192));
+    imguiDrawLine(graphicsXPos, windowHeight - 100, graphicsXPos + 100, windowHeight - 80, 2.0, RGBA(32, 32, 192, 192));
+    imguiDrawLine(graphicsXPos, windowHeight - 120, graphicsXPos + 100, windowHeight - 100, 3.0, RGBA(192, 32, 32, 192));
 
-    imguiDrawRect(30 + windowWidth / 5 * 2, windowHeight - 590, 100, 100, RGBA(32, 192, 32, 192));
-    imguiDrawRect(30 + windowWidth / 5 * 2, windowHeight - 710, 100, 100, RGBA(32, 32, 192, 192));
-    imguiDrawRect(30 + windowWidth / 5 * 2, windowHeight - 830, 100, 100, RGBA(192, 32, 32, 192));
+    imguiDrawRoundedRect(graphicsXPos, windowHeight - 240, 100, 100, 5.0, RGBA(32, 192, 32, 192));
+    imguiDrawRoundedRect(graphicsXPos, windowHeight - 350, 100, 100, 10.0, RGBA(32, 32, 192, 192));
+    imguiDrawRoundedRect(graphicsXPos, windowHeight - 470, 100, 100, 20.0, RGBA(192, 32, 32, 192));
+
+    imguiDrawRect(graphicsXPos, windowHeight - 590, 100, 100, RGBA(32, 192, 32, 192));
+    imguiDrawRect(graphicsXPos, windowHeight - 710, 100, 100, RGBA(32, 32, 192, 192));
+    imguiDrawRect(graphicsXPos, windowHeight - 830, 100, 100, RGBA(192, 32, 32, 192));
 
     imguiRender(windowWidth, windowHeight);
 }
