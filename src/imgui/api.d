@@ -18,7 +18,10 @@
 module imgui.api;
 
 /**
-    This module contains the API of the imgui library.
+    imgui is an immediate mode GUI. See also:
+    http://sol.gfxile.net/imgui/
+
+    This module contains the API of the library.
 */
 
 import std.math;
@@ -316,7 +319,7 @@ bool imguiButton(const(char)[] label, Enabled enabled = Enabled.yes)
         writeln(checkState);  // check the current state
     -----
 */
-bool imguiCheck(const(char)[] text, bool* checkState, Enabled enabled = Enabled.yes)
+bool imguiCheck(const(char)[] label, bool* checkState, Enabled enabled = Enabled.yes)
 {
     g_state.widgetId++;
     uint id = (g_state.areaId << 16) | g_state.widgetId;
@@ -346,9 +349,9 @@ bool imguiCheck(const(char)[] text, bool* checkState, Enabled enabled = Enabled.
     }
 
     if (enabled)
-        addGfxCmdText(x + BUTTON_HEIGHT, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, text, isHot(id) ? RGBA(255, 196, 0, 255) : RGBA(255, 255, 255, 200));
+        addGfxCmdText(x + BUTTON_HEIGHT, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, isHot(id) ? RGBA(255, 196, 0, 255) : RGBA(255, 255, 255, 200));
     else
-        addGfxCmdText(x + BUTTON_HEIGHT, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, text, RGBA(128, 128, 128, 200));
+        addGfxCmdText(x + BUTTON_HEIGHT, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, RGBA(128, 128, 128, 200));
 
     return res;
 }
@@ -483,7 +486,6 @@ void imguiValue(const(char)[] label)
     Params:
 
     label = The text that will be displayed above the slider.
-    subtext = Additional text displayed on the right of the label.
     sliderState = A pointer to a variable which holds the current slider value.
     minValue = The minimum value that the slider can hold.
     maxValue = The maximum value that the slider can hold.
