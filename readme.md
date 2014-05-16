@@ -26,7 +26,7 @@ $ dub
 
 ## Links
 
-- [imgui] Github repository
+- The original [imgui] github repository.
 
 ## License
 
