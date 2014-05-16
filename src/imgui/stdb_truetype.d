@@ -12,7 +12,7 @@ import core.stdc.string;
 import std.exception;
 import std.math;
 
-import imgui.gui;
+import imgui.engine;
 import imgui.gl3_renderer;
 
 package:

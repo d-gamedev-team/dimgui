@@ -15,7 +15,7 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  */
-module imgui.gui;
+module imgui.engine;
 
 import std.math;
 import std.stdio;
@@ -115,14 +115,14 @@ void addGfxCmdScissor(int x, int y, int w, int h)
     cmd.rect.h = cast(short)h;
 }
 
-void addGfxCmdRect(float x, float y, float w, float h, uint color)
+void addGfxCmdRect(float x, float y, float w, float h, RGBA color)
 {
     if (g_gfxCmdQueueSize >= GFXCMD_QUEUE_SIZE)
         return;
     auto cmd = &g_gfxCmdQueue[g_gfxCmdQueueSize++];
     cmd.type   = IMGUI_GFXCMD_RECT;
     cmd.flags  = 0;
-    cmd.col    = color;
+    cmd.col    = color.toPackedRGBA();
     cmd.rect.x = cast(short)(x * 8.0f);
     cmd.rect.y = cast(short)(y * 8.0f);
     cmd.rect.w = cast(short)(w * 8.0f);
@@ -130,14 +130,14 @@ void addGfxCmdRect(float x, float y, float w, float h, uint color)
     cmd.rect.r = 0;
 }
 
-void addGfxCmdLine(float x0, float y0, float x1, float y1, float r, uint color)
+void addGfxCmdLine(float x0, float y0, float x1, float y1, float r, RGBA color)
 {
     if (g_gfxCmdQueueSize >= GFXCMD_QUEUE_SIZE)
         return;
     auto cmd = &g_gfxCmdQueue[g_gfxCmdQueueSize++];
     cmd.type    = IMGUI_GFXCMD_LINE;
     cmd.flags   = 0;
-    cmd.col     = color;
+    cmd.col     = color.toPackedRGBA();
     cmd.line.x0 = cast(short)(x0 * 8.0f);
     cmd.line.y0 = cast(short)(y0 * 8.0f);
     cmd.line.x1 = cast(short)(x1 * 8.0f);
@@ -145,14 +145,14 @@ void addGfxCmdLine(float x0, float y0, float x1, float y1, float r, uint color)
     cmd.line.r  = cast(short)(r * 8.0f);
 }
 
-void addGfxCmdRoundedRect(float x, float y, float w, float h, float r, uint color)
+void addGfxCmdRoundedRect(float x, float y, float w, float h, float r, RGBA color)
 {
     if (g_gfxCmdQueueSize >= GFXCMD_QUEUE_SIZE)
         return;
     auto cmd = &g_gfxCmdQueue[g_gfxCmdQueueSize++];
     cmd.type   = IMGUI_GFXCMD_RECT;
     cmd.flags  = 0;
-    cmd.col    = color;
+    cmd.col    = color.toPackedRGBA();
     cmd.rect.x = cast(short)(x * 8.0f);
     cmd.rect.y = cast(short)(y * 8.0f);
     cmd.rect.w = cast(short)(w * 8.0f);
@@ -160,28 +160,28 @@ void addGfxCmdRoundedRect(float x, float y, float w, float h, float r, uint colo
     cmd.rect.r = cast(short)(r * 8.0f);
 }
 
-void addGfxCmdTriangle(int x, int y, int w, int h, int flags, uint color)
+void addGfxCmdTriangle(int x, int y, int w, int h, int flags, RGBA color)
 {
     if (g_gfxCmdQueueSize >= GFXCMD_QUEUE_SIZE)
         return;
     auto cmd = &g_gfxCmdQueue[g_gfxCmdQueueSize++];
     cmd.type   = IMGUI_GFXCMD_TRIANGLE;
     cmd.flags  = cast(byte)flags;
-    cmd.col    = color;
+    cmd.col    = color.toPackedRGBA();
     cmd.rect.x = cast(short)(x * 8.0f);
     cmd.rect.y = cast(short)(y * 8.0f);
     cmd.rect.w = cast(short)(w * 8.0f);
     cmd.rect.h = cast(short)(h * 8.0f);
 }
 
-void addGfxCmdText(int x, int y, int align_, string text, uint color)
+void addGfxCmdText(int x, int y, int align_, string text, RGBA color)
 {
     if (g_gfxCmdQueueSize >= GFXCMD_QUEUE_SIZE)
         return;
     auto cmd = &g_gfxCmdQueue[g_gfxCmdQueueSize++];
     cmd.type       = IMGUI_GFXCMD_TEXT;
     cmd.flags      = 0;
-    cmd.col        = color;
+    cmd.col        = color.toPackedRGBA();
     cmd.text.x     = cast(short)x;
     cmd.text.y     = cast(short)y;
     cmd.text.align_ = cast(short)align_;
@@ -293,7 +293,7 @@ bool buttonLogic(uint id, bool over)
 
 void updateInput(int mx, int my, ubyte mbut, int scroll)
 {
-    bool left = (mbut & IMGUI_MBUT_LEFT) != 0;
+    bool left = (mbut & MouseButton.left) != 0;
 
     g_state.mx = mx;
     g_state.my = my;

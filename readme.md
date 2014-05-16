@@ -14,6 +14,10 @@ Use [dub] to build and run the example project:
 $ dub run dimgui:example
 ```
 
+## Documentation
+
+The public API is available in the `imgui.api` module.
+
 Note: You will need to install the [glfw] shared library in order to run the example.
 
 ## Building dimgui as a static library

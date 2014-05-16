@@ -27,7 +27,7 @@ import glad.gl.all;
 import glad.gl.loader;
 
 import imgui.api;
-import imgui.gui;
+import imgui.engine;
 import imgui.stdb_truetype;
 
 package:
@@ -65,9 +65,9 @@ void* imguimalloc(size_t size, void* /*userptr*/)
     return malloc(size);
 }
 
-uint RGBA(ubyte r, ubyte g, ubyte b, ubyte a)
+uint toPackedRGBA(RGBA color)
 {
-    return (r) | (g << 8) | (b << 16) | (a << 24);
+    return (color.r) | (color.g << 8) | (color.b << 16) | (color.a << 24);
 }
 
 void drawPolygon(const(float)* coords, uint numCoords, float r, uint col)
@@ -545,9 +545,9 @@ void drawText(float x, float y, string text, int align_, uint col)
     if (!text)
         return;
 
-    if (align_ == IMGUI_ALIGN_CENTER)
+    if (align_ == TextAlign.center)
         x -= getTextLength(g_cdata.ptr, text) / 2;
-    else if (align_ == IMGUI_ALIGN_RIGHT)
+    else if (align_ == TextAlign.right)
         x -= getTextLength(g_cdata.ptr, text);
 
     float r = cast(float)(col & 0xff) / 255.0;

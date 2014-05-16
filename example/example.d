@@ -138,7 +138,7 @@ void renderGui(Window window)
     int toggle       = 0;
 
     if (leftButton == GLFW_PRESS)
-        mousebutton |= IMGUI_MBUT_LEFT;
+        mousebutton |= MouseButton.left;
 
     imguiBeginFrame(mousex, mousey, mousebutton, mscroll);
     if (mscroll != 0)
@@ -196,21 +196,21 @@ void renderGui(Window window)
     imguiEndScrollArea();
     imguiEndFrame();
 
-    imguiDrawText(30 + windowWidth / 5 * 2, windowHeight - 20, IMGUI_ALIGN_LEFT, "Free text", imguiRGBA(32, 192, 32, 192));
-    imguiDrawText(30 + windowWidth / 5 * 2 + 100, windowHeight - 40, IMGUI_ALIGN_RIGHT, "Free text", imguiRGBA(32, 32, 192, 192));
-    imguiDrawText(30 + windowWidth / 5 * 2 + 50, windowHeight - 60, IMGUI_ALIGN_CENTER, "Free text", imguiRGBA(192, 32, 32, 192));
+    imguiDrawText(30 + windowWidth / 5 * 2, windowHeight - 20, TextAlign.left, "Free text", RGBA(32, 192, 32, 192));
+    imguiDrawText(30 + windowWidth / 5 * 2 + 100, windowHeight - 40, TextAlign.right, "Free text", RGBA(32, 32, 192, 192));
+    imguiDrawText(30 + windowWidth / 5 * 2 + 50, windowHeight - 60, TextAlign.center, "Free text", RGBA(192, 32, 32, 192));
 
-    imguiDrawLine(30 + windowWidth / 5 * 2, windowHeight - 80, 30 + windowWidth / 5 * 2 + 100, windowHeight - 60, 1.0f, imguiRGBA(32, 192, 32, 192));
-    imguiDrawLine(30 + windowWidth / 5 * 2, windowHeight - 100, 30 + windowWidth / 5 * 2 + 100, windowHeight - 80, 2.0, imguiRGBA(32, 32, 192, 192));
-    imguiDrawLine(30 + windowWidth / 5 * 2, windowHeight - 120, 30 + windowWidth / 5 * 2 + 100, windowHeight - 100, 3.0, imguiRGBA(192, 32, 32, 192));
+    imguiDrawLine(30 + windowWidth / 5 * 2, windowHeight - 80, 30 + windowWidth / 5 * 2 + 100, windowHeight - 60, 1.0f, RGBA(32, 192, 32, 192));
+    imguiDrawLine(30 + windowWidth / 5 * 2, windowHeight - 100, 30 + windowWidth / 5 * 2 + 100, windowHeight - 80, 2.0, RGBA(32, 32, 192, 192));
+    imguiDrawLine(30 + windowWidth / 5 * 2, windowHeight - 120, 30 + windowWidth / 5 * 2 + 100, windowHeight - 100, 3.0, RGBA(192, 32, 32, 192));
 
-    imguiDrawRoundedRect(30 + windowWidth / 5 * 2, windowHeight - 240, 100, 100, 5.0, imguiRGBA(32, 192, 32, 192));
-    imguiDrawRoundedRect(30 + windowWidth / 5 * 2, windowHeight - 350, 100, 100, 10.0, imguiRGBA(32, 32, 192, 192));
-    imguiDrawRoundedRect(30 + windowWidth / 5 * 2, windowHeight - 470, 100, 100, 20.0, imguiRGBA(192, 32, 32, 192));
+    imguiDrawRoundedRect(30 + windowWidth / 5 * 2, windowHeight - 240, 100, 100, 5.0, RGBA(32, 192, 32, 192));
+    imguiDrawRoundedRect(30 + windowWidth / 5 * 2, windowHeight - 350, 100, 100, 10.0, RGBA(32, 32, 192, 192));
+    imguiDrawRoundedRect(30 + windowWidth / 5 * 2, windowHeight - 470, 100, 100, 20.0, RGBA(192, 32, 32, 192));
 
-    imguiDrawRect(30 + windowWidth / 5 * 2, windowHeight - 590, 100, 100, imguiRGBA(32, 192, 32, 192));
-    imguiDrawRect(30 + windowWidth / 5 * 2, windowHeight - 710, 100, 100, imguiRGBA(32, 32, 192, 192));
-    imguiDrawRect(30 + windowWidth / 5 * 2, windowHeight - 830, 100, 100, imguiRGBA(192, 32, 32, 192));
+    imguiDrawRect(30 + windowWidth / 5 * 2, windowHeight - 590, 100, 100, RGBA(32, 192, 32, 192));
+    imguiDrawRect(30 + windowWidth / 5 * 2, windowHeight - 710, 100, 100, RGBA(32, 32, 192, 192));
+    imguiDrawRect(30 + windowWidth / 5 * 2, windowHeight - 830, 100, 100, RGBA(192, 32, 32, 192));
 
     imguiRender(windowWidth, windowHeight);
 }
