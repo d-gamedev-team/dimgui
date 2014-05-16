@@ -141,6 +141,7 @@ void renderGui(Window window)
         mousebutton |= MouseButton.left;
 
     imguiBeginFrame(mousex, mousey, mousebutton, mscroll);
+
     if (mscroll != 0)
         mscroll = 0;
 
@@ -156,10 +157,12 @@ void renderGui(Window window)
 
     if (toggle)
         checked1 = !checked1;
+
     toggle = imguiCheck("Disabled checkbox", checked2, false);
 
     if (toggle)
         checked2 = !checked2;
+
     toggle = imguiCollapse("Collapse", "subtext", checked3);
 
     if (checked3)
@@ -171,10 +174,12 @@ void renderGui(Window window)
 
     if (toggle)
         checked3 = !checked3;
+
     toggle = imguiCollapse("Disabled collapse", "subtext", checked4, false);
 
     if (toggle)
         checked4 = !checked4;
+
     imguiLabel("Label");
     imguiValue("Value");
     imguiSlider("Slider", &value1, 0.0, 100.0, 1.0f);
@@ -190,7 +195,7 @@ void renderGui(Window window)
     imguiSeparatorLine();
     imguiSeparator();
 
-    for (int i = 0; i < 100; ++i)
+    foreach (i; 0 .. 100)
         imguiLabel("A wall of text");
 
     imguiEndScrollArea();
