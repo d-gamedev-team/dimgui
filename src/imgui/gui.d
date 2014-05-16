@@ -21,7 +21,6 @@ import std.math;
 import std.stdio;
 import std.string;
 
-import imgui.gl2_renderer;
 import imgui.gl3_renderer;
 
 /** Globals start. */
@@ -477,7 +476,7 @@ void imguiEndScrollArea()
     g_state.insideCurrentScroll = false;
 }
 
-bool imguiButton(string text, bool enabled)
+bool imguiButton(string text, bool enabled = true)
 {
     g_state.widgetId++;
     uint id = (g_state.areaId << 16) | g_state.widgetId;
@@ -501,7 +500,7 @@ bool imguiButton(string text, bool enabled)
     return res;
 }
 
-bool imguiItem(string text, bool enabled)
+bool imguiItem(string text, bool enabled = true)
 {
     g_state.widgetId++;
     uint id = (g_state.areaId << 16) | g_state.widgetId;
@@ -526,7 +525,7 @@ bool imguiItem(string text, bool enabled)
     return res;
 }
 
-bool imguiCheck(string text, bool checked, bool enabled)
+bool imguiCheck(string text, bool checked, bool enabled = true)
 {
     g_state.widgetId++;
     uint id = (g_state.areaId << 16) | g_state.widgetId;
@@ -560,7 +559,7 @@ bool imguiCheck(string text, bool checked, bool enabled)
     return res;
 }
 
-bool imguiCollapse(string text, string subtext, bool checked, bool enabled)
+bool imguiCollapse(string text, string subtext, bool checked, bool enabled = true)
 {
     g_state.widgetId++;
     uint id = (g_state.areaId << 16) | g_state.widgetId;
@@ -611,7 +610,7 @@ void imguiValue(string text)
     addGfxCmdText(x + w - BUTTON_HEIGHT / 2, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, IMGUI_ALIGN_RIGHT, text, imguiRGBA(255, 255, 255, 200));
 }
 
-bool imguiSlider(string text, float* val, float vmin, float vmax, float vinc, bool enabled)
+bool imguiSlider(string text, float* val, float vmin, float vmax, float vinc, bool enabled = true)
 {
     g_state.widgetId++;
     uint id = (g_state.areaId << 16) | g_state.widgetId;

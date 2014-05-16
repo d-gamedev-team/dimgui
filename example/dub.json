@@ -20,12 +20,13 @@
 
     "targetType": "executable",
 
-    "sourceFiles": ["example.d"],
+    "sourceFiles": ["example.d", "window.d"],
 
     "mainSourceFile": "example.d",
 
     "dependencies": {
         "dimgui": {"path": "../", "version": "~master"},
         "glfw-drey": ">=0.0.2",
+        "glwtf-drey": ">=0.0.1",
     },
 }

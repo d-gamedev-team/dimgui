@@ -1,5 +1,7 @@
 # dimgui
 
+![dimgui](https://raw.github.com/d-gamedev-team/dimgui/master/screenshot/dimgui.png)
+
 This is a D port of the [imgui] OpenGL GUI library.
 
 Homepage: https://github.com/d-gamedev-team/dimgui
@@ -11,6 +13,8 @@ Use [dub] to build and run the example project:
 ```
 $ dub run dimgui:example
 ```
+
+Note: You will need to install the [glfw] shared library in order to run the example.
 
 ## Building dimgui as a static library
 
@@ -32,3 +36,4 @@ See the accompanying file [license.txt][zlib].
 
 [imgui]: https://github.com/AdrienHerubel/imgui
 [zlib]: https://raw.github.com/d-gamedev-team/dimgui/master/license.txt
+[glfw]: http://www.glfw.org/
