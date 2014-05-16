@@ -74,11 +74,8 @@ int main(string[] args)
 
     auto window = createWindow("imgui", WindowMode.windowed, width, height);
 
-    int a;
-
-    auto onScroll = (double hOffset, double vOffset)
+    auto onScroll = delegate void (double hOffset, double vOffset)
     {
-        if (a) { }  // make it a delegate
         mscroll = -cast(int)vOffset;
     };
 
@@ -168,7 +165,7 @@ void renderGui(Window window)
     if (checked3)
     {
         imguiIndent();
-        imguiLabel("Collapsible element");
+        imguiLabel("Collapsable element");
         imguiUnindent();
     }
 

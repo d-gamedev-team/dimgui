@@ -351,7 +351,6 @@ bool imguiRenderGLInit(string fontpath)
 
     if (!ttfBuffer)
     {
-        fclose(fp);
         return false;
     }
 

@@ -542,14 +542,11 @@ int stbtt_InitFont(stbtt_fontinfo* info, const(ubyte)* data2, int fontstart)
                         break;
 
                     default:
-                        assert(0);
                 }
 
                 break;
 
             default:
-            {
-            }
         }
     }
 
