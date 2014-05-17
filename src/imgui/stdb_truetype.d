@@ -1647,7 +1647,6 @@ stbtt__point* stbtt_FlattenCurves(stbtt_vertex* vertices, int num_verts, float o
                     break;
 
                 default:
-                    assert(0);
             }
         }
 
