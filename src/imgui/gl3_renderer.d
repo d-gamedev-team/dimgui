@@ -347,7 +347,7 @@ bool imguiRenderGLInit(const(char)[] fontpath)
     if (!fp)
         return false;
     fseek(fp, 0, SEEK_END);
-    int size = ftell(fp);
+    long size = ftell(fp);
     fseek(fp, 0, SEEK_SET);
 
     ubyte* ttfBuffer = cast(ubyte*)malloc(size);
