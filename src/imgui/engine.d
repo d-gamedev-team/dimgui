@@ -101,7 +101,7 @@ void resetGfxCmdQueue()
     g_gfxCmdQueueSize = 0;
 }
 
-void addGfxCmdScissor(int x, int y, int w, int h)
+public void addGfxCmdScissor(int x, int y, int w, int h)
 {
     if (g_gfxCmdQueueSize >= GFXCMD_QUEUE_SIZE)
         return;
@@ -115,7 +115,7 @@ void addGfxCmdScissor(int x, int y, int w, int h)
     cmd.rect.h = cast(short)h;
 }
 
-void addGfxCmdRect(float x, float y, float w, float h, RGBA color)
+public void addGfxCmdRect(float x, float y, float w, float h, RGBA color)
 {
     if (g_gfxCmdQueueSize >= GFXCMD_QUEUE_SIZE)
         return;
@@ -130,7 +130,7 @@ void addGfxCmdRect(float x, float y, float w, float h, RGBA color)
     cmd.rect.r = 0;
 }
 
-void addGfxCmdLine(float x0, float y0, float x1, float y1, float r, RGBA color)
+public void addGfxCmdLine(float x0, float y0, float x1, float y1, float r, RGBA color)
 {
     if (g_gfxCmdQueueSize >= GFXCMD_QUEUE_SIZE)
         return;
@@ -145,7 +145,7 @@ void addGfxCmdLine(float x0, float y0, float x1, float y1, float r, RGBA color)
     cmd.line.r  = cast(short)(r * 8.0f);
 }
 
-void addGfxCmdRoundedRect(float x, float y, float w, float h, float r, RGBA color)
+public void addGfxCmdRoundedRect(float x, float y, float w, float h, float r, RGBA color)
 {
     if (g_gfxCmdQueueSize >= GFXCMD_QUEUE_SIZE)
         return;
@@ -160,7 +160,7 @@ void addGfxCmdRoundedRect(float x, float y, float w, float h, float r, RGBA colo
     cmd.rect.r = cast(short)(r * 8.0f);
 }
 
-void addGfxCmdTriangle(int x, int y, int w, int h, int flags, RGBA color)
+public void addGfxCmdTriangle(int x, int y, int w, int h, int flags, RGBA color)
 {
     if (g_gfxCmdQueueSize >= GFXCMD_QUEUE_SIZE)
         return;
@@ -174,7 +174,7 @@ void addGfxCmdTriangle(int x, int y, int w, int h, int flags, RGBA color)
     cmd.rect.h = cast(short)(h * 8.0f);
 }
 
-void addGfxCmdText(int x, int y, int align_, const(char)[] text, RGBA color)
+public void addGfxCmdText(int x, int y, int align_, const(char)[] text, RGBA color)
 {
     if (g_gfxCmdQueueSize >= GFXCMD_QUEUE_SIZE)
         return;
