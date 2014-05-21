@@ -1,4 +1,4 @@
-module example;
+module demo;
 
 import std.exception;
 import std.file;

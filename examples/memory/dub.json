@@ -1,7 +1,7 @@
 {
-    "name": "example",
+    "name": "memory",
 
-    "description": "example",
+    "description": "memory",
 
     "authors": [
         "Adrien Herubel",
@@ -14,18 +14,18 @@
 
     "license": "zlib",
 
-    "targetName" : "example",
+    "targetName" : "memory",
 
-    "targetPath" : "../bin",
+    "targetPath" : "../../bin",
 
     "targetType": "executable",
 
-    "sourceFiles": ["example.d", "window.d"],
+    "sourceFiles": ["memory.d", "window.d"],
 
-    "mainSourceFile": "example.d",
+    "mainSourceFile": "memory.d",
 
     "dependencies": {
-        "dimgui": {"path": "../", "version": "~master"},
+        "dimgui": {"path": "../../", "version": "~master"},
         "glfw-drey": ">=0.0.2",
         "glwtf-drey": ">=0.0.1",
     },

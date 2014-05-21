@@ -74,17 +74,32 @@ void imguiDestroy()
     imguiRenderGLDestroy();
 }
 
-/** Render all of the batched commands. */
-void imguiRender(int width, int height)
-{
-    imguiRenderGLDraw(width, height);
-}
-
 /**
-    Begin the definition of a new frame element.
+    Begin a new frame. All batched commands after the call to
+    $(D imguiBeginFrame) will be rendered as a single frame once
+    $(D imguiRender) is called.
 
-    Once elements within the frame area are defined
-    you must call $(D imguiEndFrame) to end the definition.
+    Note: You should call $(D imguiEndFrame) after batching all
+    commands to reset the input handling for the next frame.
+
+    Example:
+    -----
+    int cursorX, cursorY;
+    ubyte mouseButtons;
+    int mouseScroll;
+
+    /// start a new batch of commands for this frame (the batched commands)
+    imguiBeginFrame(cursorX, cursorY, mouseButtons, mouseScroll);
+
+    /// define your UI elements here
+    imguiLabel("some text here");
+
+    /// end the frame (this just resets the input control state, e.g. mouse button states)
+    imguiEndFrame();
+
+    /// now render the batched commands
+    imguiRender();
+    -----
 
     Params:
 
@@ -114,10 +129,16 @@ void imguiBeginFrame(int cursorX, int cursorY, ubyte mouseButtons, int mouseScro
     resetGfxCmdQueue();
 }
 
-/** End the definition of the last frame element. */
+/** End the list of batched commands for the current frame. */
 void imguiEndFrame()
 {
     clearInput();
+}
+
+/** Render all of the batched commands for the current frame. */
+void imguiRender(int width, int height)
+{
+    imguiRenderGLDraw(width, height);
 }
 
 /**

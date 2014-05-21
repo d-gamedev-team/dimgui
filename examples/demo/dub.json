@@ -1,0 +1,32 @@
+{
+    "name": "demo",
+
+    "description": "demo",
+
+    "authors": [
+        "Adrien Herubel",
+        "Andrej Mitrovic"
+    ],
+
+    "homepage": "https://github.com/d-gamedev-team/dimgui",
+
+    "copyright": "Copyright (C) 2012 - 2013 Adrien Herubel",
+
+    "license": "zlib",
+
+    "targetName" : "demo",
+
+    "targetPath" : "../../bin",
+
+    "targetType": "executable",
+
+    "sourceFiles": ["demo.d", "window.d"],
+
+    "mainSourceFile": "demo.d",
+
+    "dependencies": {
+        "dimgui": {"path": "../../", "version": "~master"},
+        "glfw-drey": ">=0.0.2",
+        "glwtf-drey": ">=0.0.1",
+    },
+}

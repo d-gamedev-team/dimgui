@@ -30,6 +30,7 @@
     },
 
     "subPackages": [
-        "example",
+        "examples/demo",
+        "examples/memory",
     ],
 }
