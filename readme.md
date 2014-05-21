@@ -60,4 +60,4 @@ See the accompanying file [license.txt][zlib].
 [imgui.api]: https://github.com/d-gamedev-team/dimgui/blob/master/src/imgui/api.d
 [zlib]: https://raw.github.com/d-gamedev-team/dimgui/master/license.txt
 [glfw]: http://www.glfw.org/
-[memory]: https://github.com/d-gamedev-team/dimgui/blob/master/examples/memory
+[memory]: https://github.com/d-gamedev-team/dimgui/blob/master/examples/memory/memory.d
