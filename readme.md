@@ -4,6 +4,8 @@
 
 This is a D port of the [imgui] OpenGL GUI library.
 
+**dimgui** is an [immediate-mode] GUI library.
+
 Homepage: https://github.com/d-gamedev-team/dimgui
 
 ## Examples
@@ -62,6 +64,7 @@ Distributed under the [zlib] license.
 See the accompanying file [license.txt][zlib].
 
 [dub]: http://code.dlang.org/
+[immediate-mode]: http://sol.gfxile.net/imgui/
 [imgui]: https://github.com/AdrienHerubel/imgui
 [imgui.api]: https://github.com/d-gamedev-team/dimgui/blob/master/src/imgui/api.d
 [zlib]: https://raw.github.com/d-gamedev-team/dimgui/master/license.txt
