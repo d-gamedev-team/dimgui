@@ -158,7 +158,7 @@ void imguiRender(int width, int height)
 
     Returns:
 
-    Returns $(D true) if the mouse was located inside the scrollable area.
+    $(D true) if the mouse was located inside the scrollable area.
 */
 bool imguiBeginScrollArea(const(char)[] title, int xPos, int yPos, int width, int height, int* scroll)
 {
@@ -290,9 +290,16 @@ void imguiEndScrollArea()
 
     Returns:
 
-    Returns $(D true) if the button is enabled and was pressed.
+    $(D true) if the button is enabled and was pressed.
     Note that pressing a button implies pressing and releasing the
     left mouse button while over the gui button.
+
+    Example:
+    -----
+    void onPress() { }
+    if (imguiButton("Push me"))  // button was pushed
+        onPress();
+    -----
 */
 bool imguiButton(const(char)[] label, Enabled enabled = Enabled.yes)
 {
@@ -329,7 +336,7 @@ bool imguiButton(const(char)[] label, Enabled enabled = Enabled.yes)
 
     Returns:
 
-    Returns $(D true) if the checkbox was toggled on or off.
+    $(D true) if the checkbox was toggled on or off.
     Note that toggling implies pressing and releasing the
     left mouse button while over the checkbox.
 
@@ -387,7 +394,7 @@ bool imguiCheck(const(char)[] label, bool* checkState, Enabled enabled = Enabled
 
     Returns:
 
-    Returns $(D true) if the item is enabled and was pressed.
+    $(D true) if the item is enabled and was pressed.
     Note that pressing an item implies pressing and releasing the
     left mouse button while over the item.
 */
@@ -428,7 +435,7 @@ bool imguiItem(const(char)[] label, Enabled enabled = Enabled.yes)
 
     Returns:
 
-    Returns $(D true) if the collapsable element is enabled and was pressed.
+    $(D true) if the collapsable element is enabled and was pressed.
     Note that pressing a collapsable element implies pressing and releasing the
     left mouse button while over the collapsable element.
 */
@@ -515,7 +522,7 @@ void imguiValue(const(char)[] label)
 
     Returns:
 
-    Returns $(D true) if the slider is enabled and was pressed.
+    $(D true) if the slider is enabled and was pressed.
     Note that pressing a slider implies pressing and releasing the
     left mouse button while over the slider.
 */
