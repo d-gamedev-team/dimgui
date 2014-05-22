@@ -20,6 +20,12 @@ $ dub run dimgui:memory
 
 Note: You will need to install the [glfw] shared library in order to run the example.
 
+## Real-world examples
+
+**dimgui** is used in the following projects:
+
+- [dbox] - The 2D physics library uses **dimgui** for its interactive test-suite.
+
 ## Documentation
 
 The public API is available in the [imgui.api] module.
@@ -61,3 +67,4 @@ See the accompanying file [license.txt][zlib].
 [zlib]: https://raw.github.com/d-gamedev-team/dimgui/master/license.txt
 [glfw]: http://www.glfw.org/
 [memory]: https://github.com/d-gamedev-team/dimgui/blob/master/examples/memory/memory.d
+[dbox]: https://github.com/d-gamedev-team/dbox
