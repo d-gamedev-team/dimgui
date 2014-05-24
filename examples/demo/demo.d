@@ -83,7 +83,9 @@ struct GUI
             lastInfo = sformat(buffer, "Toggled the checkbox to: '%s'", checkState1 ? "On" : "Off");
 
         // should not be clickable
-        enforce(!imguiCheck("Disabled checkbox", &checkState2, Enabled.no));
+        enforce(!imguiCheck("Inactive disabled checkbox", &checkState2, Enabled.no));
+
+        enforce(!imguiCheck("Inactive enabled checkbox", &checkState3, Enabled.no));
 
         if (imguiCollapse("Collapse", "subtext", &collapseState1))
             lastInfo = sformat(buffer, "subtext changed to: '%s'", collapseState1 ? "Maximized" : "Minimized");
@@ -190,6 +192,7 @@ private:
 
     bool checkState1 = false;
     bool checkState2 = false;
+    bool checkState3 = true;
     bool collapseState1 = true;
     bool collapseState2 = false;
     float sliderValue1 = 50.0;

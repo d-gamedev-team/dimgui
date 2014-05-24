@@ -17,6 +17,11 @@
  */
 module imgui.api;
 
+// todo: remove these
+const red = RGBA(255, 0, 0, 255);
+const green = RGBA(0, 255, 0, 255);
+const blue = RGBA(0, 0, 255, 255);
+
 /**
     imgui is an immediate mode GUI. See also:
     http://sol.gfxile.net/imgui/
@@ -76,11 +81,29 @@ struct ColorScheme
 
     static struct Checkbox
     {
-        //~ RGBA text         = RGBA(255, 255, 255, 200);
-        //~ RGBA textHover    = RGBA(255, 196,   0, 255);
-        //~ RGBA textDisabled = RGBA(128, 128, 128, 200);
-        //~ RGBA back         = RGBA(128, 128, 128, 96);
-        //~ RGBA backPress    = RGBA(128, 128, 128, 196);
+        /// Checkbox background.
+        RGBA back = RGBA(128, 128, 128, 96);
+
+        /// Checkbox background when it's pressed.
+        RGBA press = RGBA(128, 128, 128, 196);
+
+        /// An active and enabled checkbox.
+        RGBA enabled = RGBA(255, 255, 255, 255);
+
+        /// An active and enabled checkbox which was just pressed to be disabled.
+        RGBA toDisabled = RGBA(255, 255, 255, 200);
+
+        /// An inactive but enabled checkbox.
+        RGBA inactiveEnabled = RGBA(128, 128, 128, 200);
+
+        /// Label color of the checkbox.
+        RGBA text = RGBA(255, 255, 255, 200);
+
+        /// Label color of a hovered checkbox.
+        RGBA textHover = RGBA(255, 196, 0, 255);
+
+        /// Label color of an inactive checkbox.
+        RGBA inactiveText = RGBA(128, 128, 128, 200);
     }
 
     /// Colors for the generic imguiDraw* functions.
@@ -448,20 +471,22 @@ bool imguiCheck(const(char)[] label, bool* checkState, Enabled enabled = Enabled
 
     const int cx = x + BUTTON_HEIGHT / 2 - CHECK_SIZE / 2;
     const int cy = y + BUTTON_HEIGHT / 2 - CHECK_SIZE / 2;
-    addGfxCmdRoundedRect(cast(float)cx - 3, cast(float)cy - 3, cast(float)CHECK_SIZE + 6, cast(float)CHECK_SIZE + 6, 4, RGBA(128, 128, 128, isActive(id) ? 196 : 96));
+
+    addGfxCmdRoundedRect(cast(float)cx - 3, cast(float)cy - 3, cast(float)CHECK_SIZE + 6, cast(float)CHECK_SIZE + 6, 4,
+        isActive(id) ? colorScheme.checkbox.press : colorScheme.checkbox.back);
 
     if (*checkState)
     {
         if (enabled)
-            addGfxCmdRoundedRect(cast(float)cx, cast(float)cy, cast(float)CHECK_SIZE, cast(float)CHECK_SIZE, cast(float)CHECK_SIZE / 2 - 1, RGBA(255, 255, 255, isActive(id) ? 255 : 200));
+            addGfxCmdRoundedRect(cast(float)cx, cast(float)cy, cast(float)CHECK_SIZE, cast(float)CHECK_SIZE, cast(float)CHECK_SIZE / 2 - 1, isActive(id) ? colorScheme.checkbox.enabled : colorScheme.checkbox.toDisabled);
         else
-            addGfxCmdRoundedRect(cast(float)cx, cast(float)cy, cast(float)CHECK_SIZE, cast(float)CHECK_SIZE, cast(float)CHECK_SIZE / 2 - 1, RGBA(128, 128, 128, 200));
+            addGfxCmdRoundedRect(cast(float)cx, cast(float)cy, cast(float)CHECK_SIZE, cast(float)CHECK_SIZE, cast(float)CHECK_SIZE / 2 - 1, colorScheme.checkbox.inactiveEnabled);
     }
 
     if (enabled)
-        addGfxCmdText(x + BUTTON_HEIGHT, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, isHot(id) ? RGBA(255, 196, 0, 255) : RGBA(255, 255, 255, 200));
+        addGfxCmdText(x + BUTTON_HEIGHT, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, isHot(id) ? colorScheme.checkbox.textHover : colorScheme.checkbox.text);
     else
-        addGfxCmdText(x + BUTTON_HEIGHT, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, RGBA(128, 128, 128, 200));
+        addGfxCmdText(x + BUTTON_HEIGHT, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, colorScheme.checkbox.inactiveText);
 
     return res;
 }
