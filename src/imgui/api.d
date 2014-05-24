@@ -134,6 +134,8 @@ struct ColorScheme
         RGBA textHover    = RGBA(255, 196, 0, 255);
         RGBA text         = RGBA(255, 255, 255, 200);
         RGBA textDisabled = RGBA(128, 128, 128, 200);
+
+        RGBA subtext = RGBA(255, 255, 255, 128);
     }
 
     ///
@@ -155,6 +157,14 @@ struct ColorScheme
         RGBA thumb = RGBA(255, 255, 255, 64);
         RGBA thumbHover = RGBA(255, 196, 0, 128);
         RGBA thumbPress = RGBA(255, 255, 255, 255);
+
+        RGBA text = RGBA(255, 255, 255, 200);
+        RGBA textHover = RGBA(255, 196, 0, 255);
+        RGBA textDisabled = RGBA(128, 128, 128, 200);
+
+        RGBA value = RGBA(255, 255, 255, 200);
+        RGBA valueHover = RGBA(255, 196, 0, 255);
+        RGBA valueDisabled = RGBA(128, 128, 128, 200);
     }
 
     /// Colors for the generic imguiDraw* functions.
@@ -183,6 +193,9 @@ struct ColorScheme
 
     /// Colors for slider elements.
     Slider slider;
+
+    /// Color for the separator line.
+    RGBA separator = RGBA(255, 255, 255, 32);
 }
 
 /**
@@ -643,7 +656,7 @@ bool imguiCollapse(const(char)[] label, const(char)[] subtext, bool* checkState,
         addGfxCmdText(x + BUTTON_HEIGHT, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, colorScheme.collapse.textDisabled);
 
     if (subtext)
-        addGfxCmdText(x + w - BUTTON_HEIGHT / 2, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.right, subtext, RGBA(255, 255, 255, 128));
+        addGfxCmdText(x + w - BUTTON_HEIGHT / 2, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.right, subtext, colorScheme.collapse.subtext);
 
     return res;
 }
@@ -765,13 +778,13 @@ bool imguiSlider(const(char)[] label, float* sliderState, float minValue, float 
 
     if (enabled)
     {
-        addGfxCmdText(x + SLIDER_HEIGHT / 2, y + SLIDER_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, isHot(id) ? RGBA(255, 196, 0, 255) : RGBA(255, 255, 255, 200));
-        addGfxCmdText(x + w - SLIDER_HEIGHT / 2, y + SLIDER_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.right, msg, isHot(id) ? RGBA(255, 196, 0, 255) : RGBA(255, 255, 255, 200));
+        addGfxCmdText(x + SLIDER_HEIGHT / 2, y + SLIDER_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, isHot(id) ? colorScheme.slider.textHover : colorScheme.slider.text);
+        addGfxCmdText(x + w - SLIDER_HEIGHT / 2, y + SLIDER_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.right, msg, isHot(id) ? colorScheme.slider.valueHover : colorScheme.slider.value);
     }
     else
     {
-        addGfxCmdText(x + SLIDER_HEIGHT / 2, y + SLIDER_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, RGBA(128, 128, 128, 200));
-        addGfxCmdText(x + w - SLIDER_HEIGHT / 2, y + SLIDER_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.right, msg, RGBA(128, 128, 128, 200));
+        addGfxCmdText(x + SLIDER_HEIGHT / 2, y + SLIDER_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, colorScheme.slider.textDisabled);
+        addGfxCmdText(x + w - SLIDER_HEIGHT / 2, y + SLIDER_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.right, msg, colorScheme.slider.valueDisabled);
     }
 
     return res || valChanged;
@@ -806,7 +819,7 @@ void imguiSeparatorLine(const ref ColorScheme colorScheme = defaultColorScheme)
     int h = 1;
     g_state.widgetY -= DEFAULT_SPACING * 4;
 
-    addGfxCmdRect(cast(float)x, cast(float)y, cast(float)w, cast(float)h, RGBA(255, 255, 255, 32));
+    addGfxCmdRect(cast(float)x, cast(float)y, cast(float)w, cast(float)h, colorScheme.separator);
 }
 
 /** Draw text. */
