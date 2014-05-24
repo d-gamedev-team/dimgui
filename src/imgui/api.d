@@ -58,8 +58,8 @@ enum MouseButton : ubyte
 ///
 enum Enabled : bool
 {
-    no = false,
-    yes = true,
+    no,
+    yes,
 }
 
 /** Initialize the imgui library. */
