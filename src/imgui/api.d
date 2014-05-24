@@ -31,6 +31,80 @@ import std.string;
 import imgui.engine;
 import imgui.gl3_renderer;
 
+// todo: opApply to allow changing brightness on all colors.
+// todo: check CairoD samples for brightness settingsroutines.
+
+/** A color scheme contains all the configurable GUI element colors. */
+struct ColorScheme
+{
+    static struct Generic
+    {
+        RGBA text;       /// Used by imguiDrawText.
+        RGBA line;       /// Used by imguiDrawLine.
+        RGBA rect;       /// Used by imguiDrawRect.
+        RGBA roundRect;  /// Used by imguiDrawRoundedRect.
+    }
+
+    static struct Button
+    {
+        RGBA text         = RGBA(255, 255, 255, 200);
+        RGBA textHover    = RGBA(255, 196,   0, 255);
+        RGBA textDisabled = RGBA(128, 128, 128, 200);
+        RGBA back         = RGBA(128, 128, 128,  96);
+        RGBA backPress    = RGBA(128, 128, 128, 196);
+    }
+
+    static struct Scroll
+    {
+        static struct Area
+        {
+            RGBA back = RGBA(0, 0, 0, 192);
+            RGBA text = RGBA(255, 255, 255, 128);
+        }
+
+        static struct Bar
+        {
+            RGBA back = RGBA(0, 0, 0, 196);
+            RGBA thumb = RGBA(255, 255, 255, 64);
+            RGBA thumbHover = RGBA(255, 196, 0, 96);
+            RGBA thumbPress = RGBA(255, 196, 0, 196);
+        }
+
+        Area area;
+        Bar bar;
+    }
+
+    static struct Checkbox
+    {
+        //~ RGBA text         = RGBA(255, 255, 255, 200);
+        //~ RGBA textHover    = RGBA(255, 196,   0, 255);
+        //~ RGBA textDisabled = RGBA(128, 128, 128, 200);
+        //~ RGBA back         = RGBA(128, 128, 128, 96);
+        //~ RGBA backPress    = RGBA(128, 128, 128, 196);
+    }
+
+    /// Colors for the generic imguiDraw* functions.
+    Generic generic;
+
+    /// Colors for the scrollable area.
+    Scroll scroll;
+
+    /// Colors for button elements.
+    Button button;
+
+    /// Colors for checkbox elements.
+    Checkbox checkbox;
+}
+
+/**
+    The current default color scheme.
+
+    You can configure this scheme to your own liking,
+    which will be used by GUI element creation functions,
+    unless you explicitly pass a color scheme of your own.
+*/
+__gshared ColorScheme defaultColorScheme;
+
 ///
 struct RGBA
 {
@@ -160,7 +234,7 @@ void imguiRender(int width, int height)
 
     $(D true) if the mouse was located inside the scrollable area.
 */
-bool imguiBeginScrollArea(const(char)[] title, int xPos, int yPos, int width, int height, int* scroll)
+bool imguiBeginScrollArea(const(char)[] title, int xPos, int yPos, int width, int height, int* scroll, const ref ColorScheme colorScheme = defaultColorScheme)
 {
     g_state.areaId++;
     g_state.widgetId = 0;
@@ -182,9 +256,9 @@ bool imguiBeginScrollArea(const(char)[] title, int xPos, int yPos, int width, in
     g_insideScrollArea = inRect(xPos, yPos, width, height, false);
     g_state.insideCurrentScroll = g_insideScrollArea;
 
-    addGfxCmdRoundedRect(cast(float)xPos, cast(float)yPos, cast(float)width, cast(float)height, 6, RGBA(0, 0, 0, 192));
+    addGfxCmdRoundedRect(cast(float)xPos, cast(float)yPos, cast(float)width, cast(float)height, 6, colorScheme.scroll.area.back);
 
-    addGfxCmdText(xPos + AREA_HEADER / 2, yPos + height - AREA_HEADER / 2 - TEXT_HEIGHT / 2, TextAlign.left, title, RGBA(255, 255, 255, 128));
+    addGfxCmdText(xPos + AREA_HEADER / 2, yPos + height - AREA_HEADER / 2 - TEXT_HEIGHT / 2, TextAlign.left, title, colorScheme.scroll.area.text);
 
     addGfxCmdScissor(xPos + SCROLL_AREA_PADDING, yPos + SCROLL_AREA_PADDING, width - SCROLL_AREA_PADDING * 4, height - AREA_HEADER - SCROLL_AREA_PADDING);
 
@@ -192,7 +266,7 @@ bool imguiBeginScrollArea(const(char)[] title, int xPos, int yPos, int width, in
 }
 
 /** End the definition of the last scrollable element. */
-void imguiEndScrollArea()
+void imguiEndScrollArea(const ref ColorScheme colorScheme = defaultColorScheme)
 {
     // Disable scissoring.
     addGfxCmdScissor(-1, -1, -1, -1);
@@ -254,13 +328,13 @@ void imguiEndScrollArea()
         }
 
         // BG
-        addGfxCmdRoundedRect(cast(float)x, cast(float)y, cast(float)w, cast(float)h, cast(float)w / 2 - 1, RGBA(0, 0, 0, 196));
+        addGfxCmdRoundedRect(cast(float)x, cast(float)y, cast(float)w, cast(float)h, cast(float)w / 2 - 1, colorScheme.scroll.bar.back);
 
         // Bar
         if (isActive(hid))
-            addGfxCmdRoundedRect(cast(float)hx, cast(float)hy, cast(float)hw, cast(float)hh, cast(float)w / 2 - 1, RGBA(255, 196, 0, 196));
+            addGfxCmdRoundedRect(cast(float)hx, cast(float)hy, cast(float)hw, cast(float)hh, cast(float)w / 2 - 1, colorScheme.scroll.bar.thumbPress);
         else
-            addGfxCmdRoundedRect(cast(float)hx, cast(float)hy, cast(float)hw, cast(float)hh, cast(float)w / 2 - 1, isHot(hid) ? RGBA(255, 196, 0, 96) : RGBA(255, 255, 255, 64));
+            addGfxCmdRoundedRect(cast(float)hx, cast(float)hy, cast(float)hw, cast(float)hh, cast(float)w / 2 - 1, isHot(hid) ? colorScheme.scroll.bar.thumbHover : colorScheme.scroll.bar.thumb);
 
         // Handle mouse scrolling.
         if (g_insideScrollArea)         // && !anyActive())
@@ -287,6 +361,7 @@ void imguiEndScrollArea()
 
     label = The text that will be displayed on the button.
     enabled = Set whether the button can be pressed.
+    colorScheme = The color scheme to use for drawing the button elements.
 
     Returns:
 
@@ -301,7 +376,7 @@ void imguiEndScrollArea()
         onPress();
     -----
 */
-bool imguiButton(const(char)[] label, Enabled enabled = Enabled.yes)
+bool imguiButton(const(char)[] label, Enabled enabled = Enabled.yes, const ref ColorScheme colorScheme = defaultColorScheme)
 {
     g_state.widgetId++;
     uint id = (g_state.areaId << 16) | g_state.widgetId;
@@ -315,12 +390,19 @@ bool imguiButton(const(char)[] label, Enabled enabled = Enabled.yes)
     bool over = enabled && inRect(x, y, w, h);
     bool res  = buttonLogic(id, over);
 
-    addGfxCmdRoundedRect(cast(float)x, cast(float)y, cast(float)w, cast(float)h, cast(float)BUTTON_HEIGHT / 2 - 1, RGBA(128, 128, 128, isActive(id) ? 196 : 96));
+    addGfxCmdRoundedRect(cast(float)x, cast(float)y, cast(float)w, cast(float)h, cast(float)BUTTON_HEIGHT / 2 - 1,
+                         isActive(id) ? colorScheme.button.backPress : colorScheme.button.back);
 
     if (enabled)
-        addGfxCmdText(x + BUTTON_HEIGHT / 2, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, isHot(id) ? RGBA(255, 196, 0, 255) : RGBA(255, 255, 255, 200));
+    {
+        addGfxCmdText(x + BUTTON_HEIGHT / 2, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label,
+                      isHot(id) ? colorScheme.button.textHover : colorScheme.button.text);
+    }
     else
-        addGfxCmdText(x + BUTTON_HEIGHT / 2, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, RGBA(128, 128, 128, 200));
+    {
+        addGfxCmdText(x + BUTTON_HEIGHT / 2, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label,
+                      colorScheme.button.textDisabled);
+    }
 
     return res;
 }
@@ -347,7 +429,7 @@ bool imguiButton(const(char)[] label, Enabled enabled = Enabled.yes)
         writeln(checkState);  // check the current state
     -----
 */
-bool imguiCheck(const(char)[] label, bool* checkState, Enabled enabled = Enabled.yes)
+bool imguiCheck(const(char)[] label, bool* checkState, Enabled enabled = Enabled.yes, const ref ColorScheme colorScheme = defaultColorScheme)
 {
     g_state.widgetId++;
     uint id = (g_state.areaId << 16) | g_state.widgetId;
@@ -398,7 +480,7 @@ bool imguiCheck(const(char)[] label, bool* checkState, Enabled enabled = Enabled
     Note that pressing an item implies pressing and releasing the
     left mouse button while over the item.
 */
-bool imguiItem(const(char)[] label, Enabled enabled = Enabled.yes)
+bool imguiItem(const(char)[] label, Enabled enabled = Enabled.yes, const ref ColorScheme colorScheme = defaultColorScheme)
 {
     g_state.widgetId++;
     uint id = (g_state.areaId << 16) | g_state.widgetId;
@@ -439,7 +521,7 @@ bool imguiItem(const(char)[] label, Enabled enabled = Enabled.yes)
     Note that pressing a collapsable element implies pressing and releasing the
     left mouse button while over the collapsable element.
 */
-bool imguiCollapse(const(char)[] label, const(char)[] subtext, bool* checkState, Enabled enabled = Enabled.yes)
+bool imguiCollapse(const(char)[] label, const(char)[] subtext, bool* checkState, Enabled enabled = Enabled.yes, const ref ColorScheme colorScheme = defaultColorScheme)
 {
     g_state.widgetId++;
     uint id = (g_state.areaId << 16) | g_state.widgetId;
@@ -482,7 +564,7 @@ bool imguiCollapse(const(char)[] label, const(char)[] subtext, bool* checkState,
 
     label = The text that will be displayed as the label.
 */
-void imguiLabel(const(char)[] label)
+void imguiLabel(const(char)[] label, const ref ColorScheme colorScheme = defaultColorScheme)
 {
     int x = g_state.widgetX;
     int y = g_state.widgetY - BUTTON_HEIGHT;
@@ -498,7 +580,7 @@ void imguiLabel(const(char)[] label)
 
     label = The text that will be displayed as the value.
 */
-void imguiValue(const(char)[] label)
+void imguiValue(const(char)[] label, const ref ColorScheme colorScheme = defaultColorScheme)
 {
     const int x = g_state.widgetX;
     const int y = g_state.widgetY - BUTTON_HEIGHT;
@@ -526,7 +608,7 @@ void imguiValue(const(char)[] label)
     Note that pressing a slider implies pressing and releasing the
     left mouse button while over the slider.
 */
-bool imguiSlider(const(char)[] label, float* sliderState, float minValue, float maxValue, float stepValue, Enabled enabled = Enabled.yes)
+bool imguiSlider(const(char)[] label, float* sliderState, float minValue, float maxValue, float stepValue, Enabled enabled = Enabled.yes, const ref ColorScheme colorScheme = defaultColorScheme)
 {
     g_state.widgetId++;
     uint id = (g_state.areaId << 16) | g_state.widgetId;
@@ -625,7 +707,7 @@ void imguiSeparator()
 }
 
 /** Add a horizontal line as a separator below the last element. */
-void imguiSeparatorLine()
+void imguiSeparatorLine(const ref ColorScheme colorScheme = defaultColorScheme)
 {
     int x = g_state.widgetX;
     int y = g_state.widgetY - DEFAULT_SPACING * 2;
@@ -637,25 +719,25 @@ void imguiSeparatorLine()
 }
 
 /** Draw text. */
-void imguiDrawText(int xPos, int yPos, TextAlign textAlign, const(char)[] text, RGBA color)
+void imguiDrawText(int xPos, int yPos, TextAlign textAlign, const(char)[] text, RGBA color = defaultColorScheme.generic.text)
 {
     addGfxCmdText(xPos, yPos, textAlign, text, color);
 }
 
 /** Draw a line. */
-void imguiDrawLine(float x0, float y0, float x1, float y1, float r, RGBA color)
+void imguiDrawLine(float x0, float y0, float x1, float y1, float r, RGBA color = defaultColorScheme.generic.line)
 {
     addGfxCmdLine(x0, y0, x1, y1, r, color);
 }
 
 /** Draw a rectangle. */
-void imguiDrawRect(float xPos, float yPos, float width, float height, RGBA color)
+void imguiDrawRect(float xPos, float yPos, float width, float height, RGBA color = defaultColorScheme.generic.rect)
 {
     addGfxCmdRect(xPos, yPos, width, height, color);
 }
 
 /** Draw a rounded rectangle. */
-void imguiDrawRoundedRect(float xPos, float yPos, float width, float height, float r, RGBA color)
+void imguiDrawRoundedRect(float xPos, float yPos, float width, float height, float r, RGBA color = defaultColorScheme.generic.roundRect)
 {
     addGfxCmdRoundedRect(xPos, yPos, width, height, r, color);
 }
