@@ -42,6 +42,7 @@ import imgui.gl3_renderer;
 /** A color scheme contains all the configurable GUI element colors. */
 struct ColorScheme
 {
+    ///
     static struct Generic
     {
         RGBA text;       /// Used by imguiDrawText.
@@ -50,6 +51,7 @@ struct ColorScheme
         RGBA roundRect;  /// Used by imguiDrawRoundedRect.
     }
 
+    ///
     static struct Button
     {
         RGBA text         = RGBA(255, 255, 255, 200);
@@ -59,14 +61,17 @@ struct ColorScheme
         RGBA backPress    = RGBA(128, 128, 128, 196);
     }
 
+    ///
     static struct Scroll
     {
+        ///
         static struct Area
         {
             RGBA back = RGBA(0, 0, 0, 192);
             RGBA text = RGBA(255, 255, 255, 128);
         }
 
+        ///
         static struct Bar
         {
             RGBA back = RGBA(0, 0, 0, 196);
@@ -75,10 +80,11 @@ struct ColorScheme
             RGBA thumbPress = RGBA(255, 196, 0, 196);
         }
 
-        Area area;
-        Bar bar;
+        Area area; ///
+        Bar bar; ///
     }
 
+    ///
     static struct Checkbox
     {
         /// Checkbox background.
@@ -106,6 +112,14 @@ struct ColorScheme
         RGBA inactiveText = RGBA(128, 128, 128, 200);
     }
 
+    static struct Item
+    {
+        RGBA hover = RGBA(255, 196, 0, 96);
+        RGBA press = RGBA(255, 196, 0, 196);
+        RGBA text = RGBA(255, 255, 255, 200);
+        RGBA inactiveText = RGBA(128, 128, 128, 200);
+    }
+
     /// Colors for the generic imguiDraw* functions.
     Generic generic;
 
@@ -117,6 +131,9 @@ struct ColorScheme
 
     /// Colors for checkbox elements.
     Checkbox checkbox;
+
+    /// Colors for item elements.
+    Item item;
 }
 
 /**
@@ -520,12 +537,12 @@ bool imguiItem(const(char)[] label, Enabled enabled = Enabled.yes, const ref Col
     bool res  = buttonLogic(id, over);
 
     if (isHot(id))
-        addGfxCmdRoundedRect(cast(float)x, cast(float)y, cast(float)w, cast(float)h, 2.0f, RGBA(255, 196, 0, isActive(id) ? 196 : 96));
+        addGfxCmdRoundedRect(cast(float)x, cast(float)y, cast(float)w, cast(float)h, 2.0f, isActive(id) ? colorScheme.item.press : colorScheme.item.hover);
 
     if (enabled)
-        addGfxCmdText(x + BUTTON_HEIGHT / 2, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, RGBA(255, 255, 255, 200));
+        addGfxCmdText(x + BUTTON_HEIGHT / 2, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, colorScheme.item.text);
     else
-        addGfxCmdText(x + BUTTON_HEIGHT / 2, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, RGBA(128, 128, 128, 200));
+        addGfxCmdText(x + BUTTON_HEIGHT / 2, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, colorScheme.item.inactiveText);
 
     return res;
 }
