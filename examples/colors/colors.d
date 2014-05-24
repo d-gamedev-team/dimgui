@@ -1,8 +1,15 @@
-module demo;
+/*
+ *             Copyright Andrej Mitrovic 2014.
+ *  Distributed under the Boost Software License, Version 1.0.
+ *     (See accompanying file LICENSE_1_0.txt or copy at
+ *           http://www.boost.org/LICENSE_1_0.txt)
+ */
+module colors;
 
 import std.exception;
 import std.file;
 import std.path;
+import std.range;
 import std.stdio;
 import std.string;
 
@@ -21,6 +28,44 @@ import imgui;
 
 import window;
 
+struct RGBAF
+{
+    float r = 0.0, g = 0.0, b = 0.0, a = 0.0;
+
+    RGBAF opBinary(string op)(RGBAF rgba)
+    {
+        RGBAF res = this;
+
+        mixin("res.r = res.r " ~ op ~ " rgba.r;");
+        mixin("res.g = res.g " ~ op ~ " rgba.g;");
+        mixin("res.b = res.b " ~ op ~ " rgba.b;");
+        mixin("res.a = res.a " ~ op ~ " rgba.a;");
+
+        return res;
+    }
+}
+
+auto clamp(T1, T2, T3)(T1 value, T2 min, T3 max)
+{
+    return (((value) >(max)) ? (max) : (((value) <(min)) ? (min) : (value)));
+}
+
+RGBA toRGBA(RGBAF c)
+{
+    return RGBA(cast(ubyte)(255.0f * clamp(c.r, 0.0, 1.0)),
+                cast(ubyte)(255.0f * clamp(c.g, 0.0, 1.0)),
+                cast(ubyte)(255.0f * clamp(c.b, 0.0, 1.0)),
+                cast(ubyte)(255.0f * clamp(c.a, 0.0, 1.0)));
+}
+
+RGBAF toRGBAF(RGBA c)
+{
+    return RGBAF(clamp((cast(float)c.r) / 255.0, 0.0, 1.0),
+                 clamp((cast(float)c.g) / 255.0, 0.0, 1.0),
+                 clamp((cast(float)c.b) / 255.0, 0.0, 1.0),
+                 clamp((cast(float)c.a) / 255.0, 0.0, 1.0));
+}
+
 struct GUI
 {
     this(Window window)
@@ -37,6 +82,23 @@ struct GUI
         onWindowResize(width, height);
 
         window.on_resize.strongConnect(&onWindowResize);
+
+        oldColorScheme = defaultColorScheme;
+        updateColorScheme();
+    }
+
+    ColorScheme oldColorScheme;
+
+    void updateColorScheme()
+    {
+        auto rgbaBright = RGBAF(brightness, brightness, brightness, 0);
+
+        foreach (ref outColor, oldColor; zip(defaultColorScheme.walkColors, oldColorScheme.walkColors))
+        {
+            auto oldRGBAF = toRGBAF(*oldColor);
+            auto res = oldRGBAF + color + rgbaBright;
+            *outColor = res.toRGBA();
+        }
     }
 
     void render()
@@ -73,41 +135,23 @@ struct GUI
         imguiSeparatorLine();
         imguiSeparator();
 
-        imguiButton("Button");
+        if (imguiSlider("Transparency Alpha", &color.a, 0.0, 1.0, 0.01f))
+            updateColorScheme();
 
-        imguiButton("Disabled button", Enabled.no);
-        imguiItem("Item");
-        imguiItem("Disabled item", Enabled.no);
+        if (imguiSlider("Brightness", &brightness, -1.0, 1.0, 0.01f))
+            updateColorScheme();
 
-        if (imguiCheck("Checkbox", &checkState1))
-            lastInfo = sformat(buffer, "Toggled the checkbox to: '%s'", checkState1 ? "On" : "Off");
+        if (imguiSlider("Red Channel", &color.r, 0.0, 1.0, 0.01f))
+            updateColorScheme();
 
-        // should not be clickable
-        enforce(!imguiCheck("Inactive disabled checkbox", &checkState2, Enabled.no));
+        if (imguiSlider("Green Channel", &color.g, 0.0, 1.0, 0.01f))
+            updateColorScheme();
 
-        enforce(!imguiCheck("Inactive enabled checkbox", &checkState3, Enabled.no));
-
-        if (imguiCollapse("Collapse", "subtext", &collapseState1))
-            lastInfo = sformat(buffer, "subtext changed to: '%s'", collapseState1 ? "Maximized" : "Minimized");
-
-        if (collapseState1)
-        {
-            imguiIndent();
-            imguiLabel("Collapsable element");
-            imguiUnindent();
-        }
+        if (imguiSlider("Blue Channel", &color.b, 0.0, 1.0, 0.01f))
+            updateColorScheme();
 
         // should not be clickable
-        enforce(!imguiCollapse("Disabled collapse", "subtext", &collapseState2, Enabled.no));
-
-        imguiLabel("Label");
-        imguiValue("Value");
-
-        if (imguiSlider("Slider", &sliderValue1, 0.0, 100.0, 1.0f))
-            lastInfo = sformat(buffer, "Slider clicked, current value is: '%s'", sliderValue1);
-
-        // should not be clickable
-        enforce(!imguiSlider("Disabled slider", &sliderValue2, 0.0, 100.0, 1.0f, Enabled.no));
+        enforce(!imguiSlider("Disabled slider", &disabledSliderValue, 0.0, 100.0, 1.0f, Enabled.no));
 
         imguiIndent();
         imguiLabel("Indented");
@@ -195,8 +239,11 @@ private:
     bool checkState3 = true;
     bool collapseState1 = true;
     bool collapseState2 = false;
-    float sliderValue1 = 50.0;
-    float sliderValue2 = 30.0;
+
+    RGBAF color;
+    float brightness = 0;
+
+    float disabledSliderValue = 30.0;
     int scrollArea1 = 0;
     int scrollArea2 = 0;
     int scrollArea3 = 0;
