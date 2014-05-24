@@ -21,6 +21,7 @@ module imgui.api;
 const red = RGBA(255, 0, 0, 255);
 const green = RGBA(0, 255, 0, 255);
 const blue = RGBA(0, 0, 255, 255);
+const yellow = RGBA(255, 255, 0, 255);
 
 /**
     imgui is an immediate mode GUI. See also:
@@ -93,14 +94,14 @@ struct ColorScheme
         /// Checkbox background when it's pressed.
         RGBA press = RGBA(128, 128, 128, 196);
 
-        /// An active and enabled checkbox.
-        RGBA enabled = RGBA(255, 255, 255, 255);
+        /// An enabled and checked checkbox.
+        RGBA checked = RGBA(255, 255, 255, 255);
 
-        /// An active and enabled checkbox which was just pressed to be disabled.
-        RGBA toDisabled = RGBA(255, 255, 255, 200);
+        /// An enabled and checked checkbox which was just pressed to be disabled.
+        RGBA doUncheck = RGBA(255, 255, 255, 200);
 
-        /// An inactive but enabled checkbox.
-        RGBA inactiveEnabled = RGBA(128, 128, 128, 200);
+        /// A disabled but checked checkbox.
+        RGBA disabledChecked = RGBA(128, 128, 128, 200);
 
         /// Label color of the checkbox.
         RGBA text = RGBA(255, 255, 255, 200);
@@ -108,16 +109,52 @@ struct ColorScheme
         /// Label color of a hovered checkbox.
         RGBA textHover = RGBA(255, 196, 0, 255);
 
-        /// Label color of an inactive checkbox.
-        RGBA inactiveText = RGBA(128, 128, 128, 200);
+        /// Label color of an disabled checkbox.
+        RGBA textDisabled = RGBA(128, 128, 128, 200);
     }
 
+    ///
     static struct Item
     {
-        RGBA hover = RGBA(255, 196, 0, 96);
-        RGBA press = RGBA(255, 196, 0, 196);
+        RGBA hover        = RGBA(255, 196, 0, 96);
+        RGBA press        = RGBA(255, 196, 0, 196);
+        RGBA text         = RGBA(255, 255, 255, 200);
+        RGBA textDisabled = RGBA(128, 128, 128, 200);
+    }
+
+    ///
+    static struct Collapse
+    {
+        RGBA shown = RGBA(255, 255, 255, 200);
+        RGBA hidden = RGBA(255, 255, 255, 200);
+
+        RGBA doShow = RGBA(255, 255, 255, 255);
+        RGBA doHide = RGBA(255, 255, 255, 255);
+
+        RGBA textHover    = RGBA(255, 196, 0, 255);
+        RGBA text         = RGBA(255, 255, 255, 200);
+        RGBA textDisabled = RGBA(128, 128, 128, 200);
+    }
+
+    ///
+    static struct Label
+    {
+        RGBA text = RGBA(255, 255, 255, 255);
+    }
+
+    ///
+    static struct Value
+    {
         RGBA text = RGBA(255, 255, 255, 200);
-        RGBA inactiveText = RGBA(128, 128, 128, 200);
+    }
+
+    ///
+    static struct Slider
+    {
+        RGBA back = RGBA(0, 0, 0, 128);
+        RGBA thumb = RGBA(255, 255, 255, 64);
+        RGBA thumbHover = RGBA(255, 196, 0, 128);
+        RGBA thumbPress = RGBA(255, 255, 255, 255);
     }
 
     /// Colors for the generic imguiDraw* functions.
@@ -134,6 +171,18 @@ struct ColorScheme
 
     /// Colors for item elements.
     Item item;
+
+    /// Colors for collapse elements.
+    Collapse collapse;
+
+    /// Colors for label elements.
+    Label label;
+
+    /// Colors for value elements.
+    Value value;
+
+    /// Colors for slider elements.
+    Slider slider;
 }
 
 /**
@@ -495,15 +544,15 @@ bool imguiCheck(const(char)[] label, bool* checkState, Enabled enabled = Enabled
     if (*checkState)
     {
         if (enabled)
-            addGfxCmdRoundedRect(cast(float)cx, cast(float)cy, cast(float)CHECK_SIZE, cast(float)CHECK_SIZE, cast(float)CHECK_SIZE / 2 - 1, isActive(id) ? colorScheme.checkbox.enabled : colorScheme.checkbox.toDisabled);
+            addGfxCmdRoundedRect(cast(float)cx, cast(float)cy, cast(float)CHECK_SIZE, cast(float)CHECK_SIZE, cast(float)CHECK_SIZE / 2 - 1, isActive(id) ? colorScheme.checkbox.checked : colorScheme.checkbox.doUncheck);
         else
-            addGfxCmdRoundedRect(cast(float)cx, cast(float)cy, cast(float)CHECK_SIZE, cast(float)CHECK_SIZE, cast(float)CHECK_SIZE / 2 - 1, colorScheme.checkbox.inactiveEnabled);
+            addGfxCmdRoundedRect(cast(float)cx, cast(float)cy, cast(float)CHECK_SIZE, cast(float)CHECK_SIZE, cast(float)CHECK_SIZE / 2 - 1, colorScheme.checkbox.disabledChecked);
     }
 
     if (enabled)
         addGfxCmdText(x + BUTTON_HEIGHT, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, isHot(id) ? colorScheme.checkbox.textHover : colorScheme.checkbox.text);
     else
-        addGfxCmdText(x + BUTTON_HEIGHT, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, colorScheme.checkbox.inactiveText);
+        addGfxCmdText(x + BUTTON_HEIGHT, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, colorScheme.checkbox.textDisabled);
 
     return res;
 }
@@ -542,7 +591,7 @@ bool imguiItem(const(char)[] label, Enabled enabled = Enabled.yes, const ref Col
     if (enabled)
         addGfxCmdText(x + BUTTON_HEIGHT / 2, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, colorScheme.item.text);
     else
-        addGfxCmdText(x + BUTTON_HEIGHT / 2, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, colorScheme.item.inactiveText);
+        addGfxCmdText(x + BUTTON_HEIGHT / 2, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, colorScheme.item.textDisabled);
 
     return res;
 }
@@ -584,14 +633,14 @@ bool imguiCollapse(const(char)[] label, const(char)[] subtext, bool* checkState,
         *checkState ^= 1;
 
     if (*checkState)
-        addGfxCmdTriangle(cx, cy, CHECK_SIZE, CHECK_SIZE, 2, RGBA(255, 255, 255, isActive(id) ? 255 : 200));
+        addGfxCmdTriangle(cx, cy, CHECK_SIZE, CHECK_SIZE, 2, isActive(id) ? colorScheme.collapse.doHide : colorScheme.collapse.shown);
     else
-        addGfxCmdTriangle(cx, cy, CHECK_SIZE, CHECK_SIZE, 1, RGBA(255, 255, 255, isActive(id) ? 255 : 200));
+        addGfxCmdTriangle(cx, cy, CHECK_SIZE, CHECK_SIZE, 1, isActive(id) ? colorScheme.collapse.doShow : colorScheme.collapse.hidden);
 
     if (enabled)
-        addGfxCmdText(x + BUTTON_HEIGHT, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, isHot(id) ? RGBA(255, 196, 0, 255) : RGBA(255, 255, 255, 200));
+        addGfxCmdText(x + BUTTON_HEIGHT, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, isHot(id) ? colorScheme.collapse.textHover : colorScheme.collapse.text);
     else
-        addGfxCmdText(x + BUTTON_HEIGHT, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, RGBA(128, 128, 128, 200));
+        addGfxCmdText(x + BUTTON_HEIGHT, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, colorScheme.collapse.textDisabled);
 
     if (subtext)
         addGfxCmdText(x + w - BUTTON_HEIGHT / 2, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.right, subtext, RGBA(255, 255, 255, 128));
@@ -611,7 +660,7 @@ void imguiLabel(const(char)[] label, const ref ColorScheme colorScheme = default
     int x = g_state.widgetX;
     int y = g_state.widgetY - BUTTON_HEIGHT;
     g_state.widgetY -= BUTTON_HEIGHT;
-    addGfxCmdText(x, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, RGBA(255, 255, 255, 255));
+    addGfxCmdText(x, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label, colorScheme.label.text);
 }
 
 
@@ -629,7 +678,7 @@ void imguiValue(const(char)[] label, const ref ColorScheme colorScheme = default
     const int w = g_state.widgetW;
     g_state.widgetY -= BUTTON_HEIGHT;
 
-    addGfxCmdText(x + w - BUTTON_HEIGHT / 2, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.right, label, RGBA(255, 255, 255, 200));
+    addGfxCmdText(x + w - BUTTON_HEIGHT / 2, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.right, label, colorScheme.value.text);
 }
 
 /**
@@ -661,7 +710,7 @@ bool imguiSlider(const(char)[] label, float* sliderState, float minValue, float 
     int h = SLIDER_HEIGHT;
     g_state.widgetY -= SLIDER_HEIGHT + DEFAULT_SPACING;
 
-    addGfxCmdRoundedRect(cast(float)x, cast(float)y, cast(float)w, cast(float)h, 4.0f, RGBA(0, 0, 0, 128));
+    addGfxCmdRoundedRect(cast(float)x, cast(float)y, cast(float)w, cast(float)h, 4.0f, colorScheme.slider.back);
 
     const int range = w - SLIDER_MARKER_WIDTH;
 
@@ -703,9 +752,9 @@ bool imguiSlider(const(char)[] label, float* sliderState, float minValue, float 
     }
 
     if (isActive(id))
-        addGfxCmdRoundedRect(cast(float)(x + m), cast(float)y, cast(float)SLIDER_MARKER_WIDTH, cast(float)SLIDER_HEIGHT, 4.0f, RGBA(255, 255, 255, 255));
+        addGfxCmdRoundedRect(cast(float)(x + m), cast(float)y, cast(float)SLIDER_MARKER_WIDTH, cast(float)SLIDER_HEIGHT, 4.0f, colorScheme.slider.thumbPress);
     else
-        addGfxCmdRoundedRect(cast(float)(x + m), cast(float)y, cast(float)SLIDER_MARKER_WIDTH, cast(float)SLIDER_HEIGHT, 4.0f, isHot(id) ? RGBA(255, 196, 0, 128) : RGBA(255, 255, 255, 64));
+        addGfxCmdRoundedRect(cast(float)(x + m), cast(float)y, cast(float)SLIDER_MARKER_WIDTH, cast(float)SLIDER_HEIGHT, 4.0f, isHot(id) ? colorScheme.slider.thumbHover : colorScheme.slider.thumb);
 
     // TODO: fix this, take a look at 'nicenum'.
     int digits = cast(int)(ceil(log10(stepValue)));
