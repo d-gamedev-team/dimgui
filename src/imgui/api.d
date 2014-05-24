@@ -17,12 +17,6 @@
  */
 module imgui.api;
 
-// todo: remove these
-const red = RGBA(255, 0, 0, 255);
-const green = RGBA(0, 255, 0, 255);
-const blue = RGBA(0, 0, 255, 255);
-const yellow = RGBA(255, 255, 0, 255);
-
 /**
     imgui is an immediate mode GUI. See also:
     http://sol.gfxile.net/imgui/
@@ -30,12 +24,15 @@ const yellow = RGBA(255, 255, 0, 255);
     This module contains the API of the library.
 */
 
+import std.algorithm;
 import std.math;
 import std.stdio;
 import std.string;
+import std.range;
 
 import imgui.engine;
 import imgui.gl3_renderer;
+/* import imgui.util; */
 
 // todo: opApply to allow changing brightness on all colors.
 // todo: check CairoD samples for brightness settingsroutines.
@@ -43,6 +40,63 @@ import imgui.gl3_renderer;
 /** A color scheme contains all the configurable GUI element colors. */
 struct ColorScheme
 {
+    /**
+        Return a range of all colors. This gives you ref access,
+        which means you can modify the values.
+    */
+    auto walkColors()
+    {
+        return chain(
+            (&generic.text).only,
+            (&generic.line).only,
+            (&generic.rect).only,
+            (&generic.roundRect).only,
+            (&scroll.area.back).only,
+            (&scroll.area.text).only,
+            (&scroll.bar.back).only,
+            (&scroll.bar.thumb).only,
+            (&scroll.bar.thumbHover).only,
+            (&scroll.bar.thumbPress).only,
+            (&button.text).only,
+            (&button.textHover).only,
+            (&button.textDisabled).only,
+            (&button.back).only,
+            (&button.backPress).only,
+            (&checkbox.back).only,
+            (&checkbox.press).only,
+            (&checkbox.checked).only,
+            (&checkbox.doUncheck).only,
+            (&checkbox.disabledChecked).only,
+            (&checkbox.text).only,
+            (&checkbox.textHover).only,
+            (&checkbox.textDisabled).only,
+            (&item.hover).only,
+            (&item.press).only,
+            (&item.text).only,
+            (&item.textDisabled).only,
+            (&collapse.shown).only,
+            (&collapse.hidden).only,
+            (&collapse.doShow).only,
+            (&collapse.doHide).only,
+            (&collapse.textHover).only,
+            (&collapse.text).only,
+            (&collapse.textDisabled).only,
+            (&collapse.subtext).only,
+            (&label.text).only,
+            (&value.text).only,
+            (&slider.back).only,
+            (&slider.thumb).only,
+            (&slider.thumbHover).only,
+            (&slider.thumbPress).only,
+            (&slider.text).only,
+            (&slider.textHover).only,
+            (&slider.textDisabled).only,
+            (&slider.value).only,
+            (&slider.valueHover).only,
+            (&slider.valueDisabled).only,
+            (&separator).only);
+    }
+
     ///
     static struct Generic
     {
@@ -50,16 +104,6 @@ struct ColorScheme
         RGBA line;       /// Used by imguiDrawLine.
         RGBA rect;       /// Used by imguiDrawRect.
         RGBA roundRect;  /// Used by imguiDrawRoundedRect.
-    }
-
-    ///
-    static struct Button
-    {
-        RGBA text         = RGBA(255, 255, 255, 200);
-        RGBA textHover    = RGBA(255, 196,   0, 255);
-        RGBA textDisabled = RGBA(128, 128, 128, 200);
-        RGBA back         = RGBA(128, 128, 128,  96);
-        RGBA backPress    = RGBA(128, 128, 128, 196);
     }
 
     ///
@@ -83,6 +127,16 @@ struct ColorScheme
 
         Area area; ///
         Bar bar; ///
+    }
+
+    ///
+    static struct Button
+    {
+        RGBA text         = RGBA(255, 255, 255, 200);
+        RGBA textHover    = RGBA(255, 196,   0, 255);
+        RGBA textDisabled = RGBA(128, 128, 128, 200);
+        RGBA back         = RGBA(128, 128, 128,  96);
+        RGBA backPress    = RGBA(128, 128, 128, 196);
     }
 
     ///
@@ -131,8 +185,8 @@ struct ColorScheme
         RGBA doShow = RGBA(255, 255, 255, 255);
         RGBA doHide = RGBA(255, 255, 255, 255);
 
-        RGBA textHover    = RGBA(255, 196, 0, 255);
         RGBA text         = RGBA(255, 255, 255, 200);
+        RGBA textHover    = RGBA(255, 196, 0, 255);
         RGBA textDisabled = RGBA(128, 128, 128, 200);
 
         RGBA subtext = RGBA(255, 255, 255, 128);
@@ -201,9 +255,9 @@ struct ColorScheme
 /**
     The current default color scheme.
 
-    You can configure this scheme to your own liking,
-    which will be used by GUI element creation functions,
-    unless you explicitly pass a color scheme of your own.
+    You can configure this scheme, it will be used by
+    default by GUI element creation functions unless
+    you explicitly pass a custom color scheme.
 */
 __gshared ColorScheme defaultColorScheme;
 
@@ -214,6 +268,18 @@ struct RGBA
     ubyte g;
     ubyte b;
     ubyte a = 255;
+
+    RGBA opBinary(string op)(RGBA rgba)
+    {
+        RGBA res = this;
+
+        mixin("res.r = cast(ubyte)res.r " ~ op ~ " rgba.r;");
+        mixin("res.g = cast(ubyte)res.g " ~ op ~ " rgba.g;");
+        mixin("res.b = cast(ubyte)res.b " ~ op ~ " rgba.b;");
+        mixin("res.a = cast(ubyte)res.a " ~ op ~ " rgba.a;");
+
+        return res;
+    }
 }
 
 ///
@@ -331,6 +397,7 @@ void imguiRender(int width, int height)
     width = The width of the scroll area.
     height = The height of the scroll area.
     scroll = A pointer to a variable which will hold the current scroll value of the widget.
+    colorScheme = Optionally override the current default color scheme when creating this element.
 
     Returns:
 
@@ -367,7 +434,13 @@ bool imguiBeginScrollArea(const(char)[] title, int xPos, int yPos, int width, in
     return g_insideScrollArea;
 }
 
-/** End the definition of the last scrollable element. */
+/**
+    End the definition of the last scrollable element.
+
+    Params:
+
+    colorScheme = Optionally override the current default color scheme when creating this element.
+*/
 void imguiEndScrollArea(const ref ColorScheme colorScheme = defaultColorScheme)
 {
     // Disable scissoring.
@@ -463,7 +536,7 @@ void imguiEndScrollArea(const ref ColorScheme colorScheme = defaultColorScheme)
 
     label = The text that will be displayed on the button.
     enabled = Set whether the button can be pressed.
-    colorScheme = The color scheme to use for drawing the button elements.
+    colorScheme = Optionally override the current default color scheme when creating this element.
 
     Returns:
 
@@ -517,6 +590,7 @@ bool imguiButton(const(char)[] label, Enabled enabled = Enabled.yes, const ref C
     label = The text that will be displayed on the button.
     checkState = A pointer to a variable which holds the current state of the checkbox.
     enabled = Set whether the checkbox can be pressed.
+    colorScheme = Optionally override the current default color scheme when creating this element.
 
     Returns:
 
@@ -577,6 +651,7 @@ bool imguiCheck(const(char)[] label, bool* checkState, Enabled enabled = Enabled
 
     label = The text that will be displayed as the item.
     enabled = Set whether the item can be pressed.
+    colorScheme = Optionally override the current default color scheme when creating this element.
 
     Returns:
 
@@ -618,6 +693,7 @@ bool imguiItem(const(char)[] label, Enabled enabled = Enabled.yes, const ref Col
     subtext = Additional text displayed on the right of the label.
     checkState = A pointer to a variable which holds the current state of the collapsable element.
     enabled = Set whether the element can be pressed.
+    colorScheme = Optionally override the current default color scheme when creating this element.
 
     Returns:
 
@@ -667,6 +743,7 @@ bool imguiCollapse(const(char)[] label, const(char)[] subtext, bool* checkState,
     Params:
 
     label = The text that will be displayed as the label.
+    colorScheme = Optionally override the current default color scheme when creating this element.
 */
 void imguiLabel(const(char)[] label, const ref ColorScheme colorScheme = defaultColorScheme)
 {
@@ -683,6 +760,7 @@ void imguiLabel(const(char)[] label, const ref ColorScheme colorScheme = default
     Params:
 
     label = The text that will be displayed as the value.
+    colorScheme = Optionally override the current default color scheme when creating this element.
 */
 void imguiValue(const(char)[] label, const ref ColorScheme colorScheme = defaultColorScheme)
 {
@@ -705,6 +783,7 @@ void imguiValue(const(char)[] label, const ref ColorScheme colorScheme = default
     maxValue = The maximum value that the slider can hold.
     stepValue = The step at which the value of the slider will increase or decrease.
     enabled = Set whether the slider's value can can be changed with the mouse.
+    colorScheme = Optionally override the current default color scheme when creating this element.
 
     Returns:
 
@@ -770,6 +849,7 @@ bool imguiSlider(const(char)[] label, float* sliderState, float minValue, float 
         addGfxCmdRoundedRect(cast(float)(x + m), cast(float)y, cast(float)SLIDER_MARKER_WIDTH, cast(float)SLIDER_HEIGHT, 4.0f, isHot(id) ? colorScheme.slider.thumbHover : colorScheme.slider.thumb);
 
     // TODO: fix this, take a look at 'nicenum'.
+    // todo: this should display sub 0.1 if the step is low enough.
     int digits = cast(int)(ceil(log10(stepValue)));
     char[16] fmt;
     sformat(fmt, "%%.%df", digits >= 0 ? 0 : -digits);
@@ -810,7 +890,12 @@ void imguiSeparator()
     g_state.widgetY -= DEFAULT_SPACING * 3;
 }
 
-/** Add a horizontal line as a separator below the last element. */
+/**
+    Add a horizontal line as a separator below the last element.
+
+    Params:
+    colorScheme = Optionally override the current default color scheme when creating this element.
+*/
 void imguiSeparatorLine(const ref ColorScheme colorScheme = defaultColorScheme)
 {
     int x = g_state.widgetX;
@@ -822,25 +907,45 @@ void imguiSeparatorLine(const ref ColorScheme colorScheme = defaultColorScheme)
     addGfxCmdRect(cast(float)x, cast(float)y, cast(float)w, cast(float)h, colorScheme.separator);
 }
 
-/** Draw text. */
+/**
+    Draw text.
+
+    Params:
+    colorScheme = Optionally override the current default color scheme when creating this element.
+*/
 void imguiDrawText(int xPos, int yPos, TextAlign textAlign, const(char)[] text, RGBA color = defaultColorScheme.generic.text)
 {
     addGfxCmdText(xPos, yPos, textAlign, text, color);
 }
 
-/** Draw a line. */
+/**
+    Draw a line.
+
+    Params:
+    colorScheme = Optionally override the current default color scheme when creating this element.
+*/
 void imguiDrawLine(float x0, float y0, float x1, float y1, float r, RGBA color = defaultColorScheme.generic.line)
 {
     addGfxCmdLine(x0, y0, x1, y1, r, color);
 }
 
-/** Draw a rectangle. */
+/**
+    Draw a rectangle.
+
+    Params:
+    colorScheme = Optionally override the current default color scheme when creating this element.
+*/
 void imguiDrawRect(float xPos, float yPos, float width, float height, RGBA color = defaultColorScheme.generic.rect)
 {
     addGfxCmdRect(xPos, yPos, width, height, color);
 }
 
-/** Draw a rounded rectangle. */
+/**
+    Draw a rounded rectangle.
+
+    Params:
+    colorScheme = Optionally override the current default color scheme when creating this element.
+*/
 void imguiDrawRoundedRect(float xPos, float yPos, float width, float height, float r, RGBA color = defaultColorScheme.generic.roundRect)
 {
     addGfxCmdRoundedRect(xPos, yPos, width, height, r, color);

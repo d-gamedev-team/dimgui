@@ -225,7 +225,6 @@ int main(string[] args)
 
     GUI gui = GUI(window);
 
-    // Enable vertical sync (on cards that support it)
     glfwSwapInterval(1);
 
     string fontPath = thisExePath().dirName().buildPath("../").buildPath("DroidSans.ttf");
