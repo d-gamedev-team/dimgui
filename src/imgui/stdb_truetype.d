@@ -1804,10 +1804,23 @@ int stbtt_BakeFontBitmap(const(ubyte)* data, int offset,  // font location (use 
 
     scale = stbtt_ScaleForPixelHeight(&f, pixel_height);
 
+    bool have_null_glyph = false;
+    stbtt_bakedchar null_glyph_char_data;
+
     for (i = 0; i < num_chars; ++i)
     {
         int advance, lsb, x0, y0, x1, y1, gw, gh;
         int g = stbtt_FindGlyphIndex(&f, first_char + i);
+
+
+        if(g == 0 && have_null_glyph)
+        {
+            // Reuse the texture space for the null glyph instead of reinserting 
+            // it for each character we don't have glyph for.
+            chardata[i] = null_glyph_char_data;
+            continue;
+        }
+
         stbtt_GetGlyphHMetrics(&f, g, &advance, &lsb);
         stbtt_GetGlyphBitmapBox(&f, g, scale, scale, &x0, &y0, &x1, &y1);
         gw = x1 - x0;
@@ -1828,6 +1841,11 @@ int stbtt_BakeFontBitmap(const(ubyte)* data, int offset,  // font location (use 
         chardata[i].xadvance = scale * advance;
         chardata[i].xoff     = cast(float)x0;
         chardata[i].yoff     = cast(float)y0;
+        if(g == 0 && !have_null_glyph)
+        {
+            have_null_glyph = true;
+            null_glyph_char_data = chardata[i];
+        }
         x = x + gw + 2;
 
         if (y + gh + 2 > bottom_y)
