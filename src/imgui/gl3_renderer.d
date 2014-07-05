@@ -31,6 +31,15 @@ import imgui.engine;
 import imgui.stdb_truetype;
 
 package:
+// Draw up to 65536 unicode glyphs.  What this will actually do is draw *only glyphs the
+// font supports* until it will run out of glyphs or texture space (determined by
+// g_font_texture_size).  The actual number of glyphs will be in thousands (ASCII is
+// guaranteed, the rest will depend mainly on what the font supports, e.g. if it
+// supports common European characters such as á or š they will be there because they
+// are "early" in Unicode)
+//
+// Note that g_cdata uses memory of stbtt_bakedchar.sizeof * MAX_CHARACTER_COUNT which
+// at the moment is 20 * 65536 or 1.25 MiB.
 enum MAX_CHARACTER_COUNT = 1024 * 16 * 4;
 enum FIRST_CHARACTER     = 32;
 
@@ -38,6 +47,22 @@ enum FIRST_CHARACTER     = 32;
 
 /** Globals start. */
 
+// A 1024x1024 font texture takes 1MiB of memory, and should be enough for thousands of 
+// glyphs (at the fixed 15.0f size imgui uses).
+//
+// Some examples:
+//
+// =================================================== ============ =============================
+// Font                                                Texture size Glyps fit
+// =================================================== ============ =============================
+// GentiumPlus-R                                       512x512      2550 (all glyphs in the font)
+// GentiumPlus-R                                       256x256      709
+// DroidSans (the small version included for examples) 512x512      903 (all glyphs in the font)
+// DroidSans (the small version included for examples) 256x256      497
+// =================================================== ============ =============================
+// 
+// This was measured after the optimization to reuse null character glyph, which is in
+// BakeFontBitmap in stdb_truetype.d
 __gshared uint g_font_texture_size = 1024;
 __gshared float g_tempCoords[TEMP_COORD_COUNT * 2];
 __gshared float g_tempNormals[TEMP_COORD_COUNT * 2];
