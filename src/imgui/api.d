@@ -304,10 +304,22 @@ enum Enabled : bool
     yes,
 }
 
-/** Initialize the imgui library. */
-bool imguiInit(const(char)[] fontPath)
+/** Initialize the imgui library. 
+
+    Params: 
+    
+    fontPath        = Path to a TrueType font file to use to draw text.
+    fontTextureSize = Size of the texture to store font glyphs in. The actual texture
+                      size is a square of this value. A bigger texture allows to draw
+                      more Unicode characters (if the font supports them). 256 (62.5kiB)
+                      should be enough for ASCII, 1024 (1MB) should be enough for most
+                      European scripts.
+
+    Returns: True on success, false on failure.
+*/
+bool imguiInit(const(char)[] fontPath, uint fontTextureSize = 1024)
 {
-    return imguiRenderGLInit(fontPath);
+    return imguiRenderGLInit(fontPath, fontTextureSize);
 }
 
 /** Destroy the imgui library. */

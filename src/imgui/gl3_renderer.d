@@ -337,7 +337,7 @@ void drawLine(float x0, float y0, float x1, float y1, float r, float fth, uint c
     drawPolygon(verts.ptr, 4, fth, col);
 }
 
-bool imguiRenderGLInit(const(char)[] fontpath)
+bool imguiRenderGLInit(const(char)[] fontpath, const uint fontTextureSize)
 {
     for (int i = 0; i < CIRCLE_VERTS; ++i)
     {
@@ -348,6 +348,7 @@ bool imguiRenderGLInit(const(char)[] fontpath)
 
     // Load font.
     auto file = File(cast(string)fontpath, "rb");
+    g_font_texture_size = fontTextureSize;
     FILE* fp = file.getFP();
 
     if (!fp)
