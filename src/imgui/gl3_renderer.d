@@ -31,16 +31,22 @@ import imgui.engine;
 import imgui.stdb_truetype;
 
 package:
+enum MAX_CHARACTER_COUNT = 1024 * 16 * 4;
+enum FIRST_CHARACTER     = 32;
+
+
 
 /** Globals start. */
 
+__gshared uint g_font_texture_size = 1024;
 __gshared float g_tempCoords[TEMP_COORD_COUNT * 2];
 __gshared float g_tempNormals[TEMP_COORD_COUNT * 2];
 __gshared float g_tempVertices[TEMP_COORD_COUNT * 12 + (TEMP_COORD_COUNT - 2) * 6];
 __gshared float g_tempTextureCoords[TEMP_COORD_COUNT * 12 + (TEMP_COORD_COUNT - 2) * 6];
 __gshared float g_tempColors[TEMP_COORD_COUNT * 24 + (TEMP_COORD_COUNT - 2) * 12];
 __gshared float g_circleVerts[CIRCLE_VERTS * 2];
-__gshared stbtt_bakedchar[96] g_cdata; // ASCII 32..126 is 95 glyphs
+__gshared uint g_max_character_count = MAX_CHARACTER_COUNT;
+__gshared stbtt_bakedchar[MAX_CHARACTER_COUNT] g_cdata;
 __gshared GLuint g_ftex     = 0;
 __gshared GLuint g_whitetex = 0;
 __gshared GLuint g_vao      = 0;
@@ -361,7 +367,7 @@ bool imguiRenderGLInit(const(char)[] fontpath)
     // fclose(fp);
     fp = null;
 
-    ubyte* bmap = cast(ubyte*)malloc(512 * 512);
+    ubyte* bmap = cast(ubyte*)malloc(g_font_texture_size * g_font_texture_size);
 
     if (!bmap)
     {
@@ -369,12 +375,22 @@ bool imguiRenderGLInit(const(char)[] fontpath)
         return false;
     }
 
-    stbtt_BakeFontBitmap(ttfBuffer, 0, 15.0f, bmap, 512, 512, 32, 96, g_cdata.ptr);
+    const result = stbtt_BakeFontBitmap(ttfBuffer, 0, 15.0f, bmap, 
+                                        g_font_texture_size, g_font_texture_size,
+                                        FIRST_CHARACTER, g_max_character_count, g_cdata.ptr);
+    // If result is negative, we baked less than max characters so update the max 
+    // character count.
+    if(result < 0)
+    {
+        g_max_character_count = -result;
+    }
 
     // can free ttf_buffer at this point
     glGenTextures(1, &g_ftex);
     glBindTexture(GL_TEXTURE_2D, g_ftex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 512, 512, 0, GL_RED, GL_UNSIGNED_BYTE, bmap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 
+                 g_font_texture_size, g_font_texture_size,
+                 0, GL_RED, GL_UNSIGNED_BYTE, bmap);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -525,9 +541,9 @@ float getTextLength(stbtt_bakedchar* chardata, const(char)[] text)
                 }
             }
         }
-        else if (c >= 32 && c < 128)
+        else if (cast(int)c >= FIRST_CHARACTER && cast(int)c < FIRST_CHARACTER + g_max_character_count)
         {
-            stbtt_bakedchar* b = chardata + c - 32;
+            stbtt_bakedchar* b = chardata + c - FIRST_CHARACTER;
             int round_x        = STBTT_ifloor((xpos + b.xoff) + 0.5);
             len   = round_x + b.x1 - b.x0 + 0.5f;
             xpos += b.xadvance;
@@ -575,10 +591,11 @@ void drawText(float x, float y, const(char)[] text, int align_, uint col)
                 }
             }
         }
-        else if (c >= 32 && c < 128)
+        else if (c >= FIRST_CHARACTER && c < FIRST_CHARACTER + g_max_character_count)
         {
             stbtt_aligned_quad q;
-            getBakedQuad(g_cdata.ptr, 512, 512, c - 32, &x, &y, &q);
+            getBakedQuad(g_cdata.ptr, g_font_texture_size, g_font_texture_size,
+                         c - FIRST_CHARACTER, &x, &y, &q);
 
             float v[12] = [
                 q.x0, q.y0,
