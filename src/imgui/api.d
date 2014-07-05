@@ -911,7 +911,7 @@ void imguiSeparatorLine(const ref ColorScheme colorScheme = defaultColorScheme)
     Draw text.
 
     Params:
-    colorScheme = Optionally override the current default color scheme when creating this element.
+    color = Optionally override the current default text color when creating this element.
 */
 void imguiDrawText(int xPos, int yPos, TextAlign textAlign, string text, RGBA color = defaultColorScheme.generic.text)
 {
