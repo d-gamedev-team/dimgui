@@ -73,7 +73,7 @@ struct imguiGfxRect
 struct imguiGfxText
 {
     short x, y, align_;
-    const(char)[] text;
+    string text;
 }
 
 struct imguiGfxLine
@@ -174,7 +174,7 @@ public void addGfxCmdTriangle(int x, int y, int w, int h, int flags, RGBA color)
     cmd.rect.h = cast(short)(h * 8.0f);
 }
 
-public void addGfxCmdText(int x, int y, int align_, const(char)[] text, RGBA color)
+public void addGfxCmdText(int x, int y, int align_, string text, RGBA color)
 {
     if (g_gfxCmdQueueSize >= GFXCMD_QUEUE_SIZE)
         return;

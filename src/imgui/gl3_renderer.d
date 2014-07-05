@@ -521,15 +521,13 @@ void getBakedQuad(stbtt_bakedchar* chardata, int pw, int ph, int char_index,
     *xpos += b.xadvance;
 }
 
-float getTextLength(stbtt_bakedchar* chardata, const(char)[] text)
+float getTextLength(stbtt_bakedchar* chardata, string text)
 {
     float xpos = 0;
     float len  = 0;
 
-    foreach (ch; text)
+    foreach (dchar c; text)
     {
-        int c = cast(ubyte)ch;
-
         if (c == '\t')
         {
             for (int i = 0; i < 4; ++i)
@@ -553,7 +551,7 @@ float getTextLength(stbtt_bakedchar* chardata, const(char)[] text)
     return len;
 }
 
-void drawText(float x, float y, const(char)[] text, int align_, uint col)
+void drawText(float x, float y, string text, int align_, uint col)
 {
     if (!g_ftex)
         return;
@@ -576,10 +574,8 @@ void drawText(float x, float y, const(char)[] text, int align_, uint col)
 
     const float ox = x;
 
-    foreach (char ch; text)
+    foreach (dchar c; text)
     {
-        int c = cast(ubyte)ch;
-
         if (c == '\t')
         {
             for (int i = 0; i < 4; ++i)
