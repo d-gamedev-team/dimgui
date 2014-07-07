@@ -429,7 +429,12 @@ bool imguiBeginScrollArea(const(char)[] title, int xPos, int yPos, int width, in
 
     addGfxCmdText(xPos + AREA_HEADER / 2, yPos + height - AREA_HEADER / 2 - TEXT_HEIGHT / 2, TextAlign.left, title, colorScheme.scroll.area.text);
 
-    addGfxCmdScissor(xPos + SCROLL_AREA_PADDING, yPos + SCROLL_AREA_PADDING, width - SCROLL_AREA_PADDING * 4, height - AREA_HEADER - SCROLL_AREA_PADDING);
+    // The max() ensures we never have zero- or negative-sized scissor rectangle when the window is very small,
+    // avoiding a segfault.
+    addGfxCmdScissor(xPos + SCROLL_AREA_PADDING, 
+                     yPos + SCROLL_AREA_PADDING,
+                     max(1, width - SCROLL_AREA_PADDING * 4), 
+                     max(1, height - AREA_HEADER - SCROLL_AREA_PADDING));
 
     return g_insideScrollArea;
 }
