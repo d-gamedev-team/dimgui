@@ -310,10 +310,11 @@ enum Enabled : bool
     
     fontPath        = Path to a TrueType font file to use to draw text.
     fontTextureSize = Size of the texture to store font glyphs in. The actual texture
-                      size is a square of this value. A bigger texture allows to draw
-                      more Unicode characters (if the font supports them). 256 (62.5kiB)
-                      should be enough for ASCII, 1024 (1MB) should be enough for most
-                      European scripts.
+                      size is a square of this value.
+
+                      A bigger texture allows to draw more Unicode characters (if the
+                      font supports them). 256 (62.5kiB) should be enough for ASCII,
+                      1024 (1MB) should be enough for most European scripts.
 
     Returns: True on success, false on failure.
 */
