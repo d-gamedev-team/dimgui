@@ -547,12 +547,13 @@ void getBakedQuad(stbtt_bakedchar* chardata, int pw, int ph, int char_index,
     *xpos += b.xadvance;
 }
 
-float getTextLength(stbtt_bakedchar* chardata, string text)
+float getTextLength(stbtt_bakedchar* chardata, const(char)[] text)
 {
     float xpos = 0;
     float len  = 0;
 
-    foreach (dchar c; text)
+    // The cast(string) is only there for UTF-8 decoding.
+    foreach (dchar c; cast(string)text)
     {
         if (c == '\t')
         {
@@ -577,7 +578,7 @@ float getTextLength(stbtt_bakedchar* chardata, string text)
     return len;
 }
 
-void drawText(float x, float y, string text, int align_, uint col)
+void drawText(float x, float y, const(char)[] text, int align_, uint col)
 {
     if (!g_ftex)
         return;
@@ -600,7 +601,8 @@ void drawText(float x, float y, string text, int align_, uint col)
 
     const float ox = x;
 
-    foreach (dchar c; text)
+    // The cast(string) is only there for UTF-8 decoding.
+    foreach (dchar c; cast(string)text)
     {
         if (c == '\t')
         {

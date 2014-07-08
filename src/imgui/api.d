@@ -415,7 +415,7 @@ void imguiRender(int width, int height)
 
     $(D true) if the mouse was located inside the scrollable area.
 */
-bool imguiBeginScrollArea(string title, int xPos, int yPos, int width, int height, int* scroll, const ref ColorScheme colorScheme = defaultColorScheme)
+bool imguiBeginScrollArea(const(char)[] title, int xPos, int yPos, int width, int height, int* scroll, const ref ColorScheme colorScheme = defaultColorScheme)
 {
     g_state.areaId++;
     g_state.widgetId = 0;
@@ -563,7 +563,7 @@ void imguiEndScrollArea(const ref ColorScheme colorScheme = defaultColorScheme)
         onPress();
     -----
 */
-bool imguiButton(string label, Enabled enabled = Enabled.yes, const ref ColorScheme colorScheme = defaultColorScheme)
+bool imguiButton(const(char)[] label, Enabled enabled = Enabled.yes, const ref ColorScheme colorScheme = defaultColorScheme)
 {
     g_state.widgetId++;
     uint id = (g_state.areaId << 16) | g_state.widgetId;
@@ -617,7 +617,7 @@ bool imguiButton(string label, Enabled enabled = Enabled.yes, const ref ColorSch
         writeln(checkState);  // check the current state
     -----
 */
-bool imguiCheck(string label, bool* checkState, Enabled enabled = Enabled.yes, const ref ColorScheme colorScheme = defaultColorScheme)
+bool imguiCheck(const(char)[] label, bool* checkState, Enabled enabled = Enabled.yes, const ref ColorScheme colorScheme = defaultColorScheme)
 {
     g_state.widgetId++;
     uint id = (g_state.areaId << 16) | g_state.widgetId;
@@ -671,7 +671,7 @@ bool imguiCheck(string label, bool* checkState, Enabled enabled = Enabled.yes, c
     Note that pressing an item implies pressing and releasing the
     left mouse button while over the item.
 */
-bool imguiItem(string label, Enabled enabled = Enabled.yes, const ref ColorScheme colorScheme = defaultColorScheme)
+bool imguiItem(const(char)[] label, Enabled enabled = Enabled.yes, const ref ColorScheme colorScheme = defaultColorScheme)
 {
     g_state.widgetId++;
     uint id = (g_state.areaId << 16) | g_state.widgetId;
@@ -713,7 +713,7 @@ bool imguiItem(string label, Enabled enabled = Enabled.yes, const ref ColorSchem
     Note that pressing a collapsable element implies pressing and releasing the
     left mouse button while over the collapsable element.
 */
-bool imguiCollapse(string label, string subtext, bool* checkState, Enabled enabled = Enabled.yes, const ref ColorScheme colorScheme = defaultColorScheme)
+bool imguiCollapse(const(char)[] label, const(char)[] subtext, bool* checkState, Enabled enabled = Enabled.yes, const ref ColorScheme colorScheme = defaultColorScheme)
 {
     g_state.widgetId++;
     uint id = (g_state.areaId << 16) | g_state.widgetId;
@@ -757,7 +757,7 @@ bool imguiCollapse(string label, string subtext, bool* checkState, Enabled enabl
     label = The text that will be displayed as the label.
     colorScheme = Optionally override the current default color scheme when creating this element.
 */
-void imguiLabel(string label, const ref ColorScheme colorScheme = defaultColorScheme)
+void imguiLabel(const(char)[] label, const ref ColorScheme colorScheme = defaultColorScheme)
 {
     int x = g_state.widgetX;
     int y = g_state.widgetY - BUTTON_HEIGHT;
@@ -774,7 +774,7 @@ void imguiLabel(string label, const ref ColorScheme colorScheme = defaultColorSc
     label = The text that will be displayed as the value.
     colorScheme = Optionally override the current default color scheme when creating this element.
 */
-void imguiValue(string label, const ref ColorScheme colorScheme = defaultColorScheme)
+void imguiValue(const(char)[] label, const ref ColorScheme colorScheme = defaultColorScheme)
 {
     const int x = g_state.widgetX;
     const int y = g_state.widgetY - BUTTON_HEIGHT;
@@ -803,7 +803,7 @@ void imguiValue(string label, const ref ColorScheme colorScheme = defaultColorSc
     Note that pressing a slider implies pressing and releasing the
     left mouse button while over the slider.
 */
-bool imguiSlider(string label, float* sliderState, float minValue, float maxValue, float stepValue, Enabled enabled = Enabled.yes, const ref ColorScheme colorScheme = defaultColorScheme)
+bool imguiSlider(const(char)[] label, float* sliderState, float minValue, float maxValue, float stepValue, Enabled enabled = Enabled.yes, const ref ColorScheme colorScheme = defaultColorScheme)
 {
     g_state.widgetId++;
     uint id = (g_state.areaId << 16) | g_state.widgetId;
@@ -925,7 +925,7 @@ void imguiSeparatorLine(const ref ColorScheme colorScheme = defaultColorScheme)
     Params:
     color = Optionally override the current default text color when creating this element.
 */
-void imguiDrawText(int xPos, int yPos, TextAlign textAlign, string text, RGBA color = defaultColorScheme.generic.text)
+void imguiDrawText(int xPos, int yPos, TextAlign textAlign, const(char)[] text, RGBA color = defaultColorScheme.generic.text)
 {
     addGfxCmdText(xPos, yPos, textAlign, text, color);
 }
