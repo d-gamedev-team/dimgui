@@ -864,8 +864,8 @@ bool imguiSlider(const(char)[] label, float* sliderState, float minValue, float 
     // TODO: fix this, take a look at 'nicenum'.
     // todo: this should display sub 0.1 if the step is low enough.
     int digits = cast(int)(ceil(log10(stepValue)));
-    char[16] fmt;
-    sformat(fmt, "%%.%df", digits >= 0 ? 0 : -digits);
+    char[16] fmtBuf;
+    auto fmt = sformat(fmtBuf, "%%.%df", digits >= 0 ? 0 : -digits);
     char[32] msgBuf;
     string msg = sformat(msgBuf, fmt, *sliderState).idup;
 
