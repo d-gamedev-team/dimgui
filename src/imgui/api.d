@@ -304,10 +304,23 @@ enum Enabled : bool
     yes,
 }
 
-/** Initialize the imgui library. */
-bool imguiInit(const(char)[] fontPath)
+/** Initialize the imgui library. 
+
+    Params: 
+    
+    fontPath        = Path to a TrueType font file to use to draw text.
+    fontTextureSize = Size of the texture to store font glyphs in. The actual texture
+                      size is a square of this value.
+
+                      A bigger texture allows to draw more Unicode characters (if the
+                      font supports them). 256 (62.5kiB) should be enough for ASCII,
+                      1024 (1MB) should be enough for most European scripts.
+
+    Returns: True on success, false on failure.
+*/
+bool imguiInit(const(char)[] fontPath, uint fontTextureSize = 1024)
 {
-    return imguiRenderGLInit(fontPath);
+    return imguiRenderGLInit(fontPath, fontTextureSize);
 }
 
 /** Destroy the imgui library. */
@@ -851,8 +864,8 @@ bool imguiSlider(const(char)[] label, float* sliderState, float minValue, float 
     // TODO: fix this, take a look at 'nicenum'.
     // todo: this should display sub 0.1 if the step is low enough.
     int digits = cast(int)(ceil(log10(stepValue)));
-    char[16] fmt;
-    sformat(fmt, "%%.%df", digits >= 0 ? 0 : -digits);
+    char[16] fmtBuf;
+    auto fmt = sformat(fmtBuf, "%%.%df", digits >= 0 ? 0 : -digits);
     char[32] msgBuf;
     string msg = sformat(msgBuf, fmt, *sliderState).idup;
 
@@ -911,7 +924,7 @@ void imguiSeparatorLine(const ref ColorScheme colorScheme = defaultColorScheme)
     Draw text.
 
     Params:
-    colorScheme = Optionally override the current default color scheme when creating this element.
+    color = Optionally override the current default text color when creating this element.
 */
 void imguiDrawText(int xPos, int yPos, TextAlign textAlign, const(char)[] text, RGBA color = defaultColorScheme.generic.text)
 {

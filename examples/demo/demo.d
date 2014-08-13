@@ -103,6 +103,9 @@ struct GUI
         imguiLabel("Label");
         imguiValue("Value");
 
+        imguiLabel("Unicode characters");
+        imguiValue("é ř ť ý ú í ó á š ď ĺ ľ ž č ň");
+
         if (imguiSlider("Slider", &sliderValue1, 0.0, 100.0, 1.0f))
             lastInfo = sformat(buffer, "Slider clicked, current value is: '%s'", sliderValue1);
 

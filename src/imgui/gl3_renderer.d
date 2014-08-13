@@ -31,16 +31,47 @@ import imgui.engine;
 import imgui.stdb_truetype;
 
 package:
+// Draw up to 65536 unicode glyphs.  What this will actually do is draw *only glyphs the
+// font supports* until it will run out of glyphs or texture space (determined by
+// g_font_texture_size).  The actual number of glyphs will be in thousands (ASCII is
+// guaranteed, the rest will depend mainly on what the font supports, e.g. if it
+// supports common European characters such as á or š they will be there because they
+// are "early" in Unicode)
+//
+// Note that g_cdata uses memory of stbtt_bakedchar.sizeof * MAX_CHARACTER_COUNT which
+// at the moment is 20 * 65536 or 1.25 MiB.
+enum MAX_CHARACTER_COUNT = 1024 * 16 * 4;
+enum FIRST_CHARACTER     = 32;
+
+
 
 /** Globals start. */
 
+// A 1024x1024 font texture takes 1MiB of memory, and should be enough for thousands of 
+// glyphs (at the fixed 15.0f size imgui uses).
+//
+// Some examples:
+//
+// =================================================== ============ =============================
+// Font                                                Texture size Glyps fit
+// =================================================== ============ =============================
+// GentiumPlus-R                                       512x512      2550 (all glyphs in the font)
+// GentiumPlus-R                                       256x256      709
+// DroidSans (the small version included for examples) 512x512      903 (all glyphs in the font)
+// DroidSans (the small version included for examples) 256x256      497
+// =================================================== ============ =============================
+// 
+// This was measured after the optimization to reuse null character glyph, which is in
+// BakeFontBitmap in stdb_truetype.d
+__gshared uint g_font_texture_size = 1024;
 __gshared float g_tempCoords[TEMP_COORD_COUNT * 2];
 __gshared float g_tempNormals[TEMP_COORD_COUNT * 2];
 __gshared float g_tempVertices[TEMP_COORD_COUNT * 12 + (TEMP_COORD_COUNT - 2) * 6];
 __gshared float g_tempTextureCoords[TEMP_COORD_COUNT * 12 + (TEMP_COORD_COUNT - 2) * 6];
 __gshared float g_tempColors[TEMP_COORD_COUNT * 24 + (TEMP_COORD_COUNT - 2) * 12];
 __gshared float g_circleVerts[CIRCLE_VERTS * 2];
-__gshared stbtt_bakedchar[96] g_cdata; // ASCII 32..126 is 95 glyphs
+__gshared uint g_max_character_count = MAX_CHARACTER_COUNT;
+__gshared stbtt_bakedchar[MAX_CHARACTER_COUNT] g_cdata;
 __gshared GLuint g_ftex     = 0;
 __gshared GLuint g_whitetex = 0;
 __gshared GLuint g_vao      = 0;
@@ -331,7 +362,7 @@ void drawLine(float x0, float y0, float x1, float y1, float r, float fth, uint c
     drawPolygon(verts.ptr, 4, fth, col);
 }
 
-bool imguiRenderGLInit(const(char)[] fontpath)
+bool imguiRenderGLInit(const(char)[] fontpath, const uint fontTextureSize)
 {
     for (int i = 0; i < CIRCLE_VERTS; ++i)
     {
@@ -342,6 +373,7 @@ bool imguiRenderGLInit(const(char)[] fontpath)
 
     // Load font.
     auto file = File(cast(string)fontpath, "rb");
+    g_font_texture_size = fontTextureSize;
     FILE* fp = file.getFP();
 
     if (!fp)
@@ -361,7 +393,7 @@ bool imguiRenderGLInit(const(char)[] fontpath)
     // fclose(fp);
     fp = null;
 
-    ubyte* bmap = cast(ubyte*)malloc(512 * 512);
+    ubyte* bmap = cast(ubyte*)malloc(g_font_texture_size * g_font_texture_size);
 
     if (!bmap)
     {
@@ -369,12 +401,22 @@ bool imguiRenderGLInit(const(char)[] fontpath)
         return false;
     }
 
-    stbtt_BakeFontBitmap(ttfBuffer, 0, 15.0f, bmap, 512, 512, 32, 96, g_cdata.ptr);
+    const result = stbtt_BakeFontBitmap(ttfBuffer, 0, 15.0f, bmap, 
+                                        g_font_texture_size, g_font_texture_size,
+                                        FIRST_CHARACTER, g_max_character_count, g_cdata.ptr);
+    // If result is negative, we baked less than max characters so update the max 
+    // character count.
+    if(result < 0)
+    {
+        g_max_character_count = -result;
+    }
 
     // can free ttf_buffer at this point
     glGenTextures(1, &g_ftex);
     glBindTexture(GL_TEXTURE_2D, g_ftex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 512, 512, 0, GL_RED, GL_UNSIGNED_BYTE, bmap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 
+                 g_font_texture_size, g_font_texture_size,
+                 0, GL_RED, GL_UNSIGNED_BYTE, bmap);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -510,10 +552,9 @@ float getTextLength(stbtt_bakedchar* chardata, const(char)[] text)
     float xpos = 0;
     float len  = 0;
 
-    foreach (ch; text)
+    // The cast(string) is only there for UTF-8 decoding.
+    foreach (dchar c; cast(string)text)
     {
-        int c = cast(ubyte)ch;
-
         if (c == '\t')
         {
             for (int i = 0; i < 4; ++i)
@@ -525,9 +566,9 @@ float getTextLength(stbtt_bakedchar* chardata, const(char)[] text)
                 }
             }
         }
-        else if (c >= 32 && c < 128)
+        else if (cast(int)c >= FIRST_CHARACTER && cast(int)c < FIRST_CHARACTER + g_max_character_count)
         {
-            stbtt_bakedchar* b = chardata + c - 32;
+            stbtt_bakedchar* b = chardata + c - FIRST_CHARACTER;
             int round_x        = STBTT_ifloor((xpos + b.xoff) + 0.5);
             len   = round_x + b.x1 - b.x0 + 0.5f;
             xpos += b.xadvance;
@@ -560,10 +601,9 @@ void drawText(float x, float y, const(char)[] text, int align_, uint col)
 
     const float ox = x;
 
-    foreach (char ch; text)
+    // The cast(string) is only there for UTF-8 decoding.
+    foreach (dchar c; cast(string)text)
     {
-        int c = cast(ubyte)ch;
-
         if (c == '\t')
         {
             for (int i = 0; i < 4; ++i)
@@ -575,10 +615,11 @@ void drawText(float x, float y, const(char)[] text, int align_, uint col)
                 }
             }
         }
-        else if (c >= 32 && c < 128)
+        else if (c >= FIRST_CHARACTER && c < FIRST_CHARACTER + g_max_character_count)
         {
             stbtt_aligned_quad q;
-            getBakedQuad(g_cdata.ptr, 512, 512, c - 32, &x, &y, &q);
+            getBakedQuad(g_cdata.ptr, g_font_texture_size, g_font_texture_size,
+                         c - FIRST_CHARACTER, &x, &y, &q);
 
             float v[12] = [
                 q.x0, q.y0,
