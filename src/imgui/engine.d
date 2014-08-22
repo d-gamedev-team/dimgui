@@ -304,7 +304,7 @@ void updateInput(int mx, int my, ubyte mbut, int scroll)
     g_state.scroll = scroll;
 }
 
-const imguiGfxCmd* imguiGetRenderQueue()
+const(imguiGfxCmd*) imguiGetRenderQueue()
 {
     return g_gfxCmdQueue.ptr;
 }
