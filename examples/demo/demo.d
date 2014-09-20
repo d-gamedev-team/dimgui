@@ -37,6 +37,12 @@ struct GUI
         onWindowResize(width, height);
 
         window.on_resize.strongConnect(&onWindowResize);
+
+        // Not really needed, but makes it obvious what we're doing
+        textEntered = textInputBuffer[0 .. 0];
+
+        glfwSetCharCallback(window.window, &getUnicode);
+        glfwSetKeyCallback(window.window, &getKey);
     }
 
     void render()
@@ -63,7 +69,8 @@ struct GUI
         if (leftButton == GLFW_PRESS)
             mousebutton |= MouseButton.left;
 
-        imguiBeginFrame(mousex, mousey, mousebutton, mouseScroll);
+        imguiBeginFrame(mousex, mousey, mousebutton, mouseScroll, staticUnicode);
+        staticUnicode = 0;
 
         if (mouseScroll != 0)
             mouseScroll = 0;
@@ -86,6 +93,13 @@ struct GUI
         enforce(!imguiCheck("Inactive disabled checkbox", &checkState2, Enabled.no));
 
         enforce(!imguiCheck("Inactive enabled checkbox", &checkState3, Enabled.no));
+
+        if(imguiTextInput("Text input:", textInputBuffer, textEntered))
+        {
+            lastTextEntered = textEntered.idup;
+            textEntered = textInputBuffer[0 .. 0];
+        }
+        imguiLabel("Entered text: " ~ lastTextEntered);
 
         if (imguiCollapse("Collapse", "subtext", &collapseState1))
             lastInfo = sformat(buffer, "subtext changed to: '%s'", collapseState1 ? "Maximized" : "Minimized");
@@ -188,6 +202,18 @@ struct GUI
         mouseScroll = -cast(int)vOffset;
     }
 
+    extern(C) static void getUnicode(GLFWwindow* w, uint unicode)
+    {
+        staticUnicode = unicode;
+    }
+
+    extern(C) static void getKey(GLFWwindow* w, int key, int scancode, int action, int mods)
+    {
+        if(action != GLFW_PRESS) { return; }
+        if(key == GLFW_KEY_ENTER)          { staticUnicode = 0x0D; }
+        else if(key == GLFW_KEY_BACKSPACE) { staticUnicode = 0x08; }
+    }
+
 private:
     Window window;
     int windowWidth;
@@ -207,6 +233,14 @@ private:
 
     char[] lastInfo;  // last clicked element information
     char[1024] buffer;  // buffer to hold our text
+
+    static dchar staticUnicode;
+    // Buffer to store text input
+    char[128] textInputBuffer;
+    // Slice of textInputBuffer
+    char[] textEntered;
+    // Text entered last time the user the text input field.
+    string lastTextEntered;
 }
 
 int main(string[] args)
