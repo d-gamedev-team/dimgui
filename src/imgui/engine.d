@@ -194,11 +194,29 @@ struct GuiState
     bool leftPressed, leftReleased;
     int mx = -1, my = -1;
     int scroll;
+    // 'unicode' value passed to updateInput.
+    dchar unicode;
+    // 'unicode' value passed to updateInput on previous frame.
+    //
+    // Used to detect that unicode (text) input has changed.
+    dchar lastUnicode;
+    // ID of the 'inputable' widget (widget we're entering input into, e.g. text input).
+    //
+    // A text input becomes 'inputable' when it is 'hot' and left-clicked.
+    //
+    // 0 if no widget is inputable
+    uint inputable;
     uint active;
+    // The 'hot' widget (hovered over input widget).
+    //
+    // 0 if no widget is inputable
     uint hot;
+    // The widget that will be 'hot' in the next frame.
     uint hotToBe;
+    // These two are probably unused? (set but not read?)
     bool isHot;
     bool isActive;
+
     bool wentActive;
     int dragX, dragY;
     float dragOrig;
@@ -217,6 +235,12 @@ bool anyActive()
 bool isActive(uint id)
 {
     return g_state.active == id;
+}
+
+/// Is the widget with specified ID 'inputable' for e.g. text input?
+bool isInputable(uint id)
+{
+    return g_state.inputable == id;
 }
 
 bool isHot(uint id)
@@ -247,7 +271,18 @@ void clearActive()
 void setActive(uint id)
 {
     g_state.active     = id;
+    g_state.inputable  = 0;
     g_state.wentActive = true;
+}
+
+// Set the inputable widget to the widget with specified ID.
+//
+// A text input becomes 'inputable' when it is 'hot' and left-clicked.
+//
+// 0 if no widget is inputable
+void setInputable(uint id)
+{
+    g_state.inputable = id;
 }
 
 void setHot(uint id)
@@ -285,13 +320,47 @@ bool buttonLogic(uint id, bool over)
         }
     }
 
+    // Not sure if this does anything (g_state.isHot doesn't seem to be used).
     if (isHot(id))
         g_state.isHot = true;
 
     return res;
 }
 
-void updateInput(int mx, int my, ubyte mbut, int scroll)
+/** Input logic for text input fields.
+ *
+ * Params:
+ *
+ * id             = ID of the text input widget
+ * over           = Is the mouse hovering over the text input widget?
+ * forceInputable = Force the text input widget to be inputable regardless of whether it's
+ *                  hovered and clicked by the mouse or not.
+ */
+void textInputLogic(uint id, bool over, bool forceInputable)
+{
+    // If nothing else is active, we check for mouse over to make the widget hot in the 
+    // next frame, and if both hot and LMB is pressed (or forced), make it inputable.
+    if (!anyActive())
+    {
+        if (over)                                               { setHot(id); }
+        if (forceInputable || isHot(id) && g_state.leftPressed) { setInputable(id); }
+    }
+    // Not sure if this does anything (g_state.isHot doesn't seem to be used).
+    if (isHot(id)) { g_state.isHot = true; }
+}
+
+/* Update user input on the beginning of a frame.
+ *
+ * Params:
+ *
+ * mx          = Mouse X position.
+ * my          = Mouse Y position.
+ * mbut        = Mouse buttons pressed (a combination of values of a $(D MouseButton)).
+ * scroll      = Mouse wheel movement.
+ * unicodeChar = Unicode text input from the keyboard (usually the unicode result of last
+ *               keypress).
+ */
+void updateInput(int mx, int my, ubyte mbut, int scroll, dchar unicodeChar)
 {
     bool left = (mbut & MouseButton.left) != 0;
 
@@ -302,6 +371,17 @@ void updateInput(int mx, int my, ubyte mbut, int scroll)
     g_state.left         = left;
 
     g_state.scroll = scroll;
+
+    // Ignore characters we can't draw
+    if(unicodeChar > maxCharacterCount()) { unicodeChar = 0; }
+    g_state.lastUnicode = g_state.unicode;
+    g_state.unicode     = unicodeChar;
+}
+
+// Separate from gl3_renderer.getTextLength so api doesn't directly call renderer.
+float getTextLength(const(char)[] text)
+{
+    return imgui.gl3_renderer.getTextLength(text);
 }
 
 const(imguiGfxCmd*) imguiGetRenderQueue()

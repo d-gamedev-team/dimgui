@@ -138,6 +138,16 @@ struct ColorScheme
         RGBA back         = RGBA(128, 128, 128,  96);
         RGBA backPress    = RGBA(128, 128, 128, 196);
     }
+    
+    ///
+    static struct TextInput
+    {
+        RGBA label        = RGBA(255, 255, 255, 255);
+        RGBA text         = RGBA(0,   0,   0,   255);
+        RGBA textDisabled = RGBA(255, 255, 255, 255);
+        RGBA back         = RGBA(255, 196,   0, 255);
+        RGBA backDisabled = RGBA(128, 128, 128, 96);
+    }
 
     ///
     static struct Checkbox
@@ -229,6 +239,9 @@ struct ColorScheme
 
     /// Colors for button elements.
     Button button;
+
+    /// Colors for text input elements.
+    TextInput textInput;
 
     /// Colors for checkbox elements.
     Checkbox checkbox;
@@ -362,10 +375,16 @@ void imguiDestroy()
     cursorY = The cursor's last Y position.
     mouseButtons = The last mouse buttons pressed (a value or a combination of values of a $(D MouseButton)).
     mouseScroll = The last scroll value emitted by the mouse.
+    unicodeChar = Unicode text input from the keyboard (usually the unicode result of last keypress).
+                  '0' means 'no text input'. Note that for text input to work, even Enter
+                  and backspace must be passed (encoded as 0x0D and 0x08, respectively),
+                  which may not be automatically handled by your input library's text
+                  input functionality (e.g. GLFW's getUnicode() does not do this).
 */
-void imguiBeginFrame(int cursorX, int cursorY, ubyte mouseButtons, int mouseScroll)
+void imguiBeginFrame(int cursorX, int cursorY, ubyte mouseButtons, int mouseScroll,
+                     dchar unicodeChar = 0)
 {
-    updateInput(cursorX, cursorY, mouseButtons, mouseScroll);
+    updateInput(cursorX, cursorY, mouseButtons, mouseScroll, unicodeChar);
 
     g_state.hot     = g_state.hotToBe;
     g_state.hotToBe = 0;
@@ -886,6 +905,142 @@ bool imguiSlider(const(char)[] label, float* sliderState, float minValue, float 
     }
 
     return res || valChanged;
+}
+
+/** Define a text input field.
+ *
+ * Params:
+ *
+ * text           = Label that will be placed beside the text input field.
+ * buffer         = Buffer to store entered text.
+ * usedSlice      = Slice of buffer that stores text entered so far.
+ * forceInputable = Force the text input field to be inputable regardless of whether it
+ *                  has been selected by the user? Useful to e.g. make a text field
+ *                  inputable immediately after it appears in a newly opened dialog.
+ * colorScheme    = Optionally override the current default color scheme for this element.
+ *
+ * Returns: true if the user has entered and confirmed the text (by pressing Enter), false
+ *          otherwise.
+ *
+ * Example (using GLFW):
+ * --------------------
+ * static dchar staticUnicode;
+ * // Buffer to store text input
+ * char[128] textInputBuffer;
+ * // Slice of textInputBuffer
+ * char[] textEntered;
+ *
+ * extern(C) static void getUnicode(GLFWwindow* w, uint unicode)
+ * {
+ *     staticUnicode = unicode;
+ * }
+ *
+ * extern(C) static void getKey(GLFWwindow* w, int key, int scancode, int action, int mods)
+ * {
+ *     if(action != GLFW_PRESS) { return; }
+ *     if(key == GLFW_KEY_ENTER)          { staticUnicode = 0x0D; }
+ *     else if(key == GLFW_KEY_BACKSPACE) { staticUnicode = 0x08; }
+ * }
+ *
+ * void init()
+ * {
+ *     GLFWwindow* window;
+ *
+ *     // ... init the window here ...
+ *
+ *     // Not really needed, but makes it obvious what we're doing
+ *     textEntered = textInputBuffer[0 .. 0];
+ *     glfwSetCharCallback(window, &getUnicode);
+ *     glfwSetKeyCallback(window, &getKey);
+ * }
+ *
+ * void frame()
+ * {
+ *     // These should be defined somewhere
+ *     int mouseX, mouseY, mouseScroll;
+ *     ubyte mousebutton;
+ *
+ *     // .. code here ..
+ *
+ *     // Pass text input to imgui
+ *     imguiBeginFrame(cast(int)mouseX, cast(int)mouseY, mousebutton, mouseScroll, staticUnicode);
+ *     // reset staticUnicode for the next frame
+ *
+ *     staticUnicode = 0;
+ *
+ *     if(imguiTextInput("Text input:", textInputBuffer, textEntered))
+ *     {
+ *         import std.stdio;
+ *         writeln("Entered text is: ", textEntered);
+ *         // Reset entered text for next input (use e.g. textEntered.dup if you need a copy).
+ *         textEntered = textInputBuffer[0 .. 0];
+ *     }
+ *
+ *     // .. more code here ..
+ * }
+ * --------------------
+ */
+bool imguiTextInput(const(char)[] label, char[] buffer, ref char[] usedSlice,
+                    bool forceInputable = false, const ref ColorScheme colorScheme = defaultColorScheme)
+{
+    assert(buffer.ptr == usedSlice.ptr && buffer.length >= usedSlice.length,
+           "The usedSlice parameter on imguiTextInput must be a slice to the buffer " ~
+           "parameter");
+
+    // Label
+    g_state.widgetId++;
+    uint id = (g_state.areaId << 16) | g_state.widgetId;
+    int x   = g_state.widgetX;
+    int y   = g_state.widgetY - BUTTON_HEIGHT;
+    addGfxCmdText(x, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2, TextAlign.left, label,
+                  colorScheme.textInput.label);
+
+    bool res = false;
+    // Handle control input if any (Backspace to erase characters, Enter to confirm).
+    // Backspace
+    if(isInputable(id) && g_state.unicode == 0x08 &&
+       g_state.unicode != g_state.lastUnicode && !usedSlice.empty)
+    {
+        usedSlice = usedSlice[0 .. $ - 1];
+    }
+    // Pressing Enter "confirms" the input.
+    else if(isInputable(id) && g_state.unicode == 0x0D && g_state.unicode != g_state.lastUnicode)
+    {
+        g_state.inputable = 0;
+        res = true;
+    }
+    else if(isInputable(id) && g_state.unicode != 0 && g_state.unicode != g_state.lastUnicode)
+    {
+        import std.utf;
+        char[4] codePoints;
+        const codePointCount = std.utf.encode(codePoints, g_state.unicode);
+        // Only add the character into the buffer if we can fit it there.
+        if(buffer.length - usedSlice.length >= codePointCount)
+        {
+            usedSlice = buffer[0 .. usedSlice.length + codePointCount];
+            usedSlice[$ - codePointCount .. $] = codePoints[0 .. codePointCount];
+        }
+    }
+
+    // Draw buffer data
+    uint labelLen = cast(uint)(imgui.engine.getTextLength(label) + 0.5f);
+    x += labelLen;
+    int w = g_state.widgetW - labelLen - DEFAULT_SPACING * 2;
+    int h = BUTTON_HEIGHT;
+    bool over = inRect(x, y, w, h);
+    textInputLogic(id, over, forceInputable);
+    addGfxCmdRoundedRect(cast(float)(x + DEFAULT_SPACING), cast(float)y,
+                         cast(float)w, cast(float)h, 
+                         cast(float)BUTTON_HEIGHT / 2 - 1, 
+                         isInputable(id) ? colorScheme.textInput.back
+                                         : colorScheme.textInput.backDisabled);
+    addGfxCmdText(x + DEFAULT_SPACING * 2, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2,
+                  TextAlign.left, usedSlice,
+                  isInputable(id) ? colorScheme.textInput.text
+                                  : colorScheme.textInput.textDisabled);
+
+    g_state.widgetY -= BUTTON_HEIGHT + DEFAULT_SPACING;
+    return res;
 }
 
 /** Add horizontal indentation for elements to be added. */

@@ -585,6 +585,11 @@ float getTextLength(stbtt_bakedchar* chardata, const(char)[] text)
     return len;
 }
 
+float getTextLength(const(char)[] text)
+{
+    return getTextLength(g_cdata.ptr, text);
+}
+
 void drawText(float x, float y, const(char)[] text, int align_, uint col)
 {
     if (!g_ftex)
