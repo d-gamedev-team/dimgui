@@ -24,6 +24,11 @@
 
     "mainSourceFile": "demo.d",
 
+    "libs-posix": [
+        "dl",
+        "glfw",
+    ],
+
     "dependencies": {
         "dimgui": {"path": "../../", "version": "~master"},
         "glfw-drey": ">=0.0.2",

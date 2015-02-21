@@ -30,7 +30,7 @@ import imgui.api;
 import imgui.engine;
 import imgui.stdb_truetype;
 
-package:
+private:
 // Draw up to 65536 unicode glyphs.  What this will actually do is draw *only glyphs the
 // font supports* until it will run out of glyphs or texture space (determined by
 // g_font_texture_size).  The actual number of glyphs will be in thousands (ASCII is
@@ -85,6 +85,13 @@ __gshared GLuint g_programTextureLocation  = 0;
 enum TEMP_COORD_COUNT = 100;
 enum int CIRCLE_VERTS = 8 * 4;
 immutable float[4] g_tabStops = [150, 210, 270, 330];
+
+package:
+
+uint maxCharacterCount() @trusted nothrow @nogc
+{
+    return g_max_character_count;
+}
 
 void imguifree(void* ptr, void* /*userptr*/)
 {
@@ -576,6 +583,11 @@ float getTextLength(stbtt_bakedchar* chardata, const(char)[] text)
     }
 
     return len;
+}
+
+float getTextLength(const(char)[] text)
+{
+    return getTextLength(g_cdata.ptr, text);
 }
 
 void drawText(float x, float y, const(char)[] text, int align_, uint col)
