@@ -8,6 +8,11 @@ This is a D port of the [imgui] OpenGL GUI library.
 
 Homepage: https://github.com/d-gamedev-team/dimgui
 
+## Supported compilers
+
+Currently requires DMD v2.071.0, not tested with other compilers,
+and not frequently tested on Windows.
+
 ## Examples
 
 Use [dub] to build and run the example project:
