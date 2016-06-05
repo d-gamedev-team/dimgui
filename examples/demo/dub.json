@@ -22,6 +22,8 @@
 
     "sourceFiles": ["demo.d", "window.d"],
 
+    "sourceFiles-windows": ["../../implibs/glfw3-x86-implib.lib"],
+
     "mainSourceFile": "demo.d",
 
     "libs-posix": [

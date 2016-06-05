@@ -24,6 +24,8 @@
 
     "mainSourceFile": "colors.d",
 
+    "sourceFiles-windows": ["../../implibs/glfw3-x86-implib.lib"],
+
     "libs-posix": [
         "dl",
         "glfw3",
