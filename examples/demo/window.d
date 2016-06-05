@@ -150,10 +150,11 @@ class GLException : Exception
     Throwing exceptions across language boundaries is ok as
     long as $(B GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB) is enabled.
 */
-extern (Windows)
+extern (System)
 private void glErrorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, in GLchar* message, GLvoid* userParam)
 {
-    string msg = format("source: %s, type: %s, id: %s, severity: %s, length: %s, message: %s, userParam: %s",
-                         source, type, id, severity, length, message.to!string, userParam);
-    throw new GLException(msg);
+    //string msg = format("glErrorCallback: source: %s, type: %s, id: %s, severity: %s, length: %s, message: %s, userParam: %s",
+    //                     source, type, id, severity, length, message.to!string, userParam);
+
+    //stderr.writeln(msg);
 }

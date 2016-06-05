@@ -964,7 +964,7 @@ int stbtt_GetGlyphShape(const(stbtt_fontinfo)* info, int glyph_index, stbtt_vert
             stbtt_uint16 flags, gidx;
             int comp_num_verts       = 0, i;
             stbtt_vertex* comp_verts, tmp;
-            float mtx[6] = [1, 0, 0, 1, 0, 0];
+            float[6] mtx = [1, 0, 0, 1, 0, 0];
             float m, n;
 
             flags = ttSHORT(comp);
@@ -1339,7 +1339,7 @@ void stbtt__rasterize_sorted_edges(stbtt__bitmap* result, stbtt__edge* e, int n,
     int y, j = 0;
     int max_weight = (255 / vsubsample); // weight per vertical scanline
     int s;                               // vertical subsample index
-    ubyte scanline_data[512];
+    ubyte[512] scanline_data;
     ubyte* scanline;
 
     if (result.w > 512)
@@ -1815,7 +1815,7 @@ int stbtt_BakeFontBitmap(const(ubyte)* data, int offset,  // font location (use 
 
         if(g == 0 && have_null_glyph)
         {
-            // Reuse the texture space for the null glyph instead of reinserting 
+            // Reuse the texture space for the null glyph instead of reinserting
             // it for each character we don't have glyph for.
             chardata[i] = null_glyph_char_data;
             continue;

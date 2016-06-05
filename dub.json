@@ -25,10 +25,6 @@
         "src"
     ],
 
-    "dependencies": {
-        "glad-drey": ">=0.0.2",
-    },
-
     "subPackages": [
         "examples/demo",
         "examples/memory",
