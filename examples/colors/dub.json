@@ -24,9 +24,20 @@
 
     "mainSourceFile": "colors.d",
 
+    "libs-posix": [
+        "dl",
+        "glfw3",
+        "GL",
+        "Xrandr",
+        "Xext",
+        "Xxf86vm",
+        "Xi",
+        "Xcursor",
+        "Xinerama",
+        "X11"
+    ],
+
     "dependencies": {
-        "dimgui": {"path": "../../", "version": "~master"},
-        "glfw-drey": ">=0.0.2",
-        "glwtf-drey": ">=0.0.1",
+        "dimgui": {"path": "../../", "version": "~master"}
     },
 }

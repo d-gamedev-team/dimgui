@@ -26,6 +26,7 @@
     ],
 
     "subPackages": [
+        "examples/colors",
         "examples/demo",
         "examples/memory",
     ],
