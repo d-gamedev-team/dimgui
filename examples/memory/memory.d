@@ -36,7 +36,7 @@ struct GUI
 
         int width;
         int height;
-        glfwGetWindowSize(window.window, &width, &height);
+        glfwGetFramebufferSize(window.window, &width, &height);
 
         // trigger initial viewport transform.
         onWindowResize(width, height);
@@ -194,6 +194,7 @@ struct GUI
             device coordinate space to window space. It specifies the
             viewable region of a window.
         */
+        glfwGetFramebufferSize(window.window, &width, &height);
         glViewport(x, y, width, height);
 
         windowWidth = width;
