@@ -1459,7 +1459,7 @@ void stbtt__rasterize_sorted_edges(stbtt__bitmap* result, stbtt__edge* e, int n,
         STBTT_free(scanline, userdata);
 }
 
-extern(C) int stbtt__edge_compare(const void* p, const void* q)
+extern(C) int stbtt__edge_compare(scope const void* p, scope const void* q)
 {
     stbtt__edge* a = cast(stbtt__edge*)p;
     stbtt__edge* b = cast(stbtt__edge*)q;
