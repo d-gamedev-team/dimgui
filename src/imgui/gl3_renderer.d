@@ -455,18 +455,18 @@ bool imguiRenderGLInit(const(char)[] fontpath, const uint fontTextureSize)
     g_program = glCreateProgram();
 
     string vs =
-        "#version 150\n"
-        "uniform vec2 Viewport;\n"
-        "in vec2 VertexPosition;\n"
-        "in vec2 VertexTexCoord;\n"
-        "in vec4 VertexColor;\n"
-        "out vec2 texCoord;\n"
-        "out vec4 vertexColor;\n"
-        "void main(void)\n"
-        "{\n"
-        "    vertexColor = VertexColor;\n"
-        "    texCoord = VertexTexCoord;\n"
-        "    gl_Position = vec4(VertexPosition * 2.0 / Viewport - 1.0, 0.f, 1.0);\n"
+        "#version 150\n" ~
+        "uniform vec2 Viewport;\n" ~
+        "in vec2 VertexPosition;\n" ~
+        "in vec2 VertexTexCoord;\n" ~
+        "in vec4 VertexColor;\n" ~
+        "out vec2 texCoord;\n" ~
+        "out vec4 vertexColor;\n" ~
+        "void main(void)\n" ~
+        "{\n" ~
+        "    vertexColor = VertexColor;\n" ~
+        "    texCoord = VertexTexCoord;\n" ~
+        "    gl_Position = vec4(VertexPosition * 2.0 / Viewport - 1.0, 0.f, 1.0);\n" ~
         "}\n";
     GLuint vso = glCreateShader(GL_VERTEX_SHADER);
     auto vsPtr = vs.ptr;
@@ -475,15 +475,15 @@ bool imguiRenderGLInit(const(char)[] fontpath, const uint fontTextureSize)
     glAttachShader(g_program, vso);
 
     string fs =
-        "#version 150\n"
-        "in vec2 texCoord;\n"
-        "in vec4 vertexColor;\n"
-        "uniform sampler2D Texture;\n"
-        "out vec4  Color;\n"
-        "void main(void)\n"
-        "{\n"
-        "    float alpha = texture(Texture, texCoord).r;\n"
-        "    Color = vec4(vertexColor.rgb, vertexColor.a * alpha);\n"
+        "#version 150\n" ~
+        "in vec2 texCoord;\n" ~
+        "in vec4 vertexColor;\n" ~
+        "uniform sampler2D Texture;\n" ~
+        "out vec4  Color;\n" ~
+        "void main(void)\n" ~
+        "{\n" ~
+        "    float alpha = texture(Texture, texCoord).r;\n" ~
+        "    Color = vec4(vertexColor.rgb, vertexColor.a * alpha);\n" ~
         "}\n";
     GLuint fso = glCreateShader(GL_FRAGMENT_SHADER);
 
