@@ -26,6 +26,11 @@ import imgui;
 
 import window;
 
+version (OSX)
+    version = MaybeHighResolutionDisplay;
+version (iOS)
+    version = MaybeHighResolutionDisplay;
+
 struct GUI
 {
     this(Window window)
@@ -53,6 +58,25 @@ struct GUI
         double mouseX;
         double mouseY;
         glfwGetCursorPos(window.window, &mouseX, &mouseY);
+
+        version (MaybeHighResolutionDisplay)
+        {
+            // Scale the cursor position for high-resolution displays.
+            if (mouseXToWindowFactor == 0) // need to initialize
+            {
+                int virtualWindowWidth, virtualWindowHeight;
+                glfwGetWindowSize(window.window, &virtualWindowWidth, &virtualWindowHeight);
+                if (virtualWindowWidth != 0 && virtualWindowHeight != 0)
+                {
+                    int frameBufferWidth, frameBufferHeight;
+                    glfwGetFramebufferSize(window.window, &frameBufferWidth, &frameBufferHeight);
+                    mouseXToWindowFactor = double(frameBufferWidth) / virtualWindowWidth;
+                    mouseYToWindowFactor = double(frameBufferHeight) / virtualWindowHeight;
+                }
+            }
+            mouseX *= mouseXToWindowFactor;
+            mouseY *= mouseYToWindowFactor;
+        }
 
         const scrollAreaWidth = (windowWidth / 4) - 10;  // -10 to allow room for the scrollbar
         const scrollAreaHeight = windowHeight - 20;
@@ -199,6 +223,11 @@ struct GUI
 
         windowWidth = width;
         windowHeight = height;
+        version (MaybeHighResolutionDisplay)
+        {
+            mouseXToWindowFactor = 0;
+            mouseYToWindowFactor = 0;
+        }
     }
 
     void onScroll(double hOffset, double vOffset)
@@ -210,6 +239,11 @@ private:
     Window window;
     int windowWidth;
     int windowHeight;
+version (MaybeHighResolutionDisplay)
+{
+    double mouseXToWindowFactor = 0;
+    double mouseYToWindowFactor = 0;
+}
 
     int scrollArea1 = 0;
     int scrollArea2 = 0;
