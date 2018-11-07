@@ -30,7 +30,10 @@
 
     "libs-posix": [
         "dl",
-        "glfw3",
+        "glfw3"
+    ],
+
+    "libs-linux": [
         "GL",
         "Xrandr",
         "Xext",
