@@ -843,7 +843,7 @@ int stbtt_GetGlyphShape(const(stbtt_fontinfo)* info, int glyph_index, stbtt_vert
             if (flags & 2)
             {
                 stbtt_int16 dx = *points++;
-                x += (flags & 16) ? dx : -dx; // ???
+                x += (flags & 16) ? dx : -cast(int)dx; // ???
             }
             else
             {
@@ -866,7 +866,7 @@ int stbtt_GetGlyphShape(const(stbtt_fontinfo)* info, int glyph_index, stbtt_vert
             if (flags & 4)
             {
                 stbtt_int16 dy = *points++;
-                y += (flags & 32) ? dy : -dy; // ???
+                y += (flags & 32) ? dy : -cast(int)dy; // ???
             }
             else
             {
