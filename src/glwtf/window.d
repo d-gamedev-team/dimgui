@@ -7,7 +7,7 @@ private {
     import glwtf.exception : WindowException;
 
     import std.string : toStringz;
-    import std.exception : enforceEx;
+    import std.exception : enforce;
     import std.typecons : Tuple;
 }
 
@@ -57,7 +57,7 @@ class Window : BaseGLFWEventHandler {
 
     this(GLFWwindow* window) {
         super();
-        
+
         this.window = window;
         register_callbacks(window);
     }
@@ -93,7 +93,7 @@ class Window : BaseGLFWEventHandler {
 
     void create(int width, int height, string title, GLFWmonitor* monitor = null, GLFWwindow* share = null) {
         window = glfwCreateWindow(width, height, title.toStringz(), monitor, share);
-        enforceEx!WindowException(window !is null, "Failed to create GLFW Window");
+        enforce!WindowException(window !is null, "Failed to create GLFW Window");
         register_callbacks(window);
     }
 
@@ -156,7 +156,7 @@ class Window : BaseGLFWEventHandler {
 //     void show() {
 //         glfwShowWindow(window);
 //     }
-// 
+//
 //     void hide() {
 //         glfwHideWindow(window);
 //     }
@@ -189,7 +189,7 @@ class Window : BaseGLFWEventHandler {
         if(on_close !is null) {
             return on_close();
         }
-        
+
         return true;
     }
 }
