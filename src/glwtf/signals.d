@@ -473,7 +473,7 @@ private struct SignalImpl
         {
             int emptyCount = 0;
             auto mslots = _slots.slots;
-            foreach (int i, ref slot; mslots)
+            foreach (i, ref slot; mslots)
             // We are retrieving obj twice which is quite expensive because of GC lock:
                 if(!slot.isValid || isRemoved(slot))
                 {
