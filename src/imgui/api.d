@@ -138,7 +138,7 @@ struct ColorScheme
         RGBA back         = RGBA(128, 128, 128,  96);
         RGBA backPress    = RGBA(128, 128, 128, 196);
     }
-    
+
     ///
     static struct TextInput
     {
@@ -317,10 +317,10 @@ enum Enabled : bool
     yes,
 }
 
-/** Initialize the imgui library. 
+/** Initialize the imgui library.
 
-    Params: 
-    
+    Params:
+
     fontPath        = Path to a TrueType font file to use to draw text.
     fontTextureSize = Size of the texture to store font glyphs in. The actual texture
                       size is a square of this value.
@@ -463,9 +463,9 @@ bool imguiBeginScrollArea(const(char)[] title, int xPos, int yPos, int width, in
 
     // The max() ensures we never have zero- or negative-sized scissor rectangle when the window is very small,
     // avoiding a segfault.
-    addGfxCmdScissor(xPos + SCROLL_AREA_PADDING, 
+    addGfxCmdScissor(xPos + SCROLL_AREA_PADDING,
                      yPos + SCROLL_AREA_PADDING,
-                     max(1, width - SCROLL_AREA_PADDING * 4), 
+                     max(1, width - SCROLL_AREA_PADDING * 4),
                      max(1, height - AREA_HEADER - SCROLL_AREA_PADDING));
 
     return g_insideScrollArea;
@@ -1030,8 +1030,8 @@ bool imguiTextInput(const(char)[] label, char[] buffer, ref char[] usedSlice,
     bool over = inRect(x, y, w, h);
     textInputLogic(id, over, forceInputable);
     addGfxCmdRoundedRect(cast(float)(x + DEFAULT_SPACING), cast(float)y,
-                         cast(float)w, cast(float)h, 
-                         cast(float)BUTTON_HEIGHT / 2 - 1, 
+                         cast(float)w, cast(float)h,
+                         cast(float)BUTTON_HEIGHT / 2 - 1,
                          isInputable(id) ? colorScheme.textInput.back
                                          : colorScheme.textInput.backDisabled);
     addGfxCmdText(x + DEFAULT_SPACING * 2, y + BUTTON_HEIGHT / 2 - TEXT_HEIGHT / 2,

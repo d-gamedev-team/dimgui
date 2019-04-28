@@ -338,7 +338,7 @@ bool buttonLogic(uint id, bool over)
  */
 void textInputLogic(uint id, bool over, bool forceInputable)
 {
-    // If nothing else is active, we check for mouse over to make the widget hot in the 
+    // If nothing else is active, we check for mouse over to make the widget hot in the
     // next frame, and if both hot and LMB is pressed (or forced), make it inputable.
     if (!anyActive())
     {
