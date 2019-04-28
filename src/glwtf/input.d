@@ -160,20 +160,20 @@ class BaseGLFWEventHandler : AEventHandler {
         glfwSetScrollCallback(window, &scroll_callback);
     }
 
-    protected void _on_key_down(int key, int scancode, int modifier) {
+    public void _on_key_down(int key, int scancode, int modifier) {
         keymap[key] = true;
         single_key_down[key].emit();
     }
 
-    protected void _on_key_up(int key, int scancode, int modifier) {
+    public void _on_key_up(int key, int scancode, int modifier) {
         keymap[key] = false;
         single_key_up[key].emit();
     }
 
-    protected void _on_mouse_button_down(int button, int modifier) {
+    public void _on_mouse_button_down(int button, int modifier) {
         mousemap[button] = true;
     }
-    protected void _on_mouse_button_up(int button, int modifier) {
+    public void _on_mouse_button_up(int button, int modifier) {
         mousemap[button] = false;
     }
 
