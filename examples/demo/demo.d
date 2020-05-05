@@ -282,6 +282,7 @@ int main(string[] args)
     int width = 1024, height = 768;
 
     auto window = createWindow("imgui", WindowMode.windowed, width, height);
+    scope (exit) destroy(window);
 
     GUI gui = GUI(window);
 
