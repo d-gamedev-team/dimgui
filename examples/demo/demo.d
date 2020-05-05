@@ -110,8 +110,9 @@ struct GUI
         imguiItem("Item");
         imguiItem("Disabled item", Enabled.no);
 
+        static char[1024] buff1;
         if (imguiCheck("Checkbox", &checkState1))
-            lastInfo = sformat(buffer, "Toggled the checkbox to: '%s'", checkState1 ? "On" : "Off");
+            lastInfo = sformat(buff1, "Toggled the checkbox to: '%s'", checkState1 ? "On" : "Off");
 
         // should not be clickable
         enforce(!imguiCheck("Inactive disabled checkbox", &checkState2, Enabled.no));
@@ -125,8 +126,9 @@ struct GUI
         }
         imguiLabel("Entered text: " ~ lastTextEntered);
 
+        static char[1024] buff2;
         if (imguiCollapse("Collapse", "subtext", &collapseState1))
-            lastInfo = sformat(buffer, "subtext changed to: '%s'", collapseState1 ? "Maximized" : "Minimized");
+            lastInfo = sformat(buff2, "subtext changed to: '%s'", collapseState1 ? "Maximized" : "Minimized");
 
         if (collapseState1)
         {
@@ -144,8 +146,9 @@ struct GUI
         imguiLabel("Unicode characters");
         imguiValue("한글 é ý ú í ó á š ž");
 
+        static char[1024] buff3;
         if (imguiSlider("Slider", &sliderValue1, 0.0, 100.0, 1.0f))
-            lastInfo = sformat(buffer, "Slider clicked, current value is: '%s'", sliderValue1);
+            lastInfo = sformat(buff3, "Slider clicked, current value is: '%s'", sliderValue1);
 
         // should not be clickable
         enforce(!imguiSlider("Disabled slider", &sliderValue2, 0.0, 100.0, 1.0f, Enabled.no));
@@ -266,7 +269,6 @@ version (MaybeHighResolutionDisplay)
     int mouseScroll = 0;
 
     char[] lastInfo;  // last clicked element information
-    char[1024] buffer;  // buffer to hold our text
 
     static dchar staticUnicode;
     // Buffer to store text input

@@ -285,7 +285,6 @@ version (MaybeHighResolutionDisplay)
     int mouseScroll = 0;
 
     char[] lastInfo;  // last clicked element information
-    char[1024] buffer;  // buffer to hold our text
 }
 
 int main(string[] args)
