@@ -22,25 +22,7 @@
 
     "sourceFiles": ["demo.d", "window.d"],
 
-    "sourceFiles-windows": ["../../implibs/glfw3-x86-implib.lib"],
-
     "mainSourceFile": "demo.d",
-
-    "libs-posix": [
-        "dl",
-        "glfw3"
-    ],
-
-    "libs-linux": [
-        "GL",
-        "Xrandr",
-        "Xext",
-        "Xxf86vm",
-        "Xi",
-        "Xcursor",
-        "Xinerama",
-        "X11"
-    ],
 
     "dependencies": {
         "dimgui": {"path": "../../", "version": "~master"}
