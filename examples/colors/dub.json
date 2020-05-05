@@ -24,24 +24,6 @@
 
     "mainSourceFile": "colors.d",
 
-    "sourceFiles-windows": ["../../implibs/glfw3-x86-implib.lib"],
-
-    "libs-posix": [
-        "dl",
-        "glfw3"
-    ],
-
-    "libs-linux": [
-        "GL",
-        "Xrandr",
-        "Xext",
-        "Xxf86vm",
-        "Xi",
-        "Xcursor",
-        "Xinerama",
-        "X11"
-    ],
-
     "dependencies": {
         "dimgui": {"path": "../../", "version": "~master"}
     },

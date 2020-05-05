@@ -25,6 +25,27 @@
         "src"
     ],
 
+    "libs-posix": [
+        "dl",
+        "glfw3"
+    ],
+
+    "libs-linux": [
+        "GL",
+        "Xrandr",
+        "Xext",
+        "Xxf86vm",
+        "Xi",
+        "Xcursor",
+        "Xinerama",
+        "X11"
+    ],
+
+    "libs-windows": ["glfw3dll"],
+
+    "lflags-windows-x86": ["/LIBPATH:$PACKAGE_DIR\\lib\\x86"],
+    "lflags-windows-x86_64": ["/LIBPATH:$PACKAGE_DIR\\lib\\x86-64"],
+
     "subPackages": [
         "examples/colors",
         "examples/demo",
