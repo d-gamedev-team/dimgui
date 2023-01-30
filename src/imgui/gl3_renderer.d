@@ -614,7 +614,8 @@ void drawText(float x, float y, const(char)[] text, int align_, uint col)
     const float ox = x;
 
     // The cast(string) is only there for UTF-8 decoding.
-    foreach (ubyte c; cast(ubyte[])text)
+    //foreach (ubyte c; cast(ubyte[])text)
+    foreach (dchar c; cast(string)text)
     {
         if (c == '\t')
         {
